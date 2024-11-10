@@ -1,0 +1,12 @@
+Pour actualisation hébergement : 
+npm run build
+/leaderboard/ dans asset-manifest.json
+git add .
+git commit -m "first commit"
+git push -u origin main
+
+
+Pour voir prévisualisation :
+npm start
+dans App.js (changer le nom en rouge 
+du leaderboard stizo cup pour le lien)

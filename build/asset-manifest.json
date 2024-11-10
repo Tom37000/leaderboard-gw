@@ -1,0 +1,24 @@
+{
+  "files": {
+    "main.css": "/leaderboard/build/static/css/main.fefca9fd.css",
+    "main.js": "/leaderboard/build/static/js/main.69f9bd66.js",
+    "static/js/714.5f9c9d50.chunk.js": "/leaderboard/build/static/js/714.5f9c9d50.chunk.js",
+    "static/media/artm_background.png": "/leaderboard/build/static/media/artm_background.1293d020e94ed65f9ed3.png",
+    "static/media/reddysh_royale_background.png": "/leaderboard/build/static/media/reddysh_royale_background.84434ba45ecdd7c68360.png",
+    "static/media/IMPACT.TTF": "/leaderboard/build/static/media/IMPACT.393c8a0b905e3208112c.TTF",
+    "static/media/leaderboard_background.png": "/leaderboard/build/static/media/leaderboard_background.6d0bcb66fe9829c326ac.png",
+    "static/media/OmnesSemiBold.ttf": "/leaderboard/build/static/media/OmnesSemiBold.d9e74f703b27c9c45d13.ttf",
+    "static/media/wolt_character.png": "/leaderboard/build/static/media/wolt_character.749771f67862b91fb4db.png",
+    "static/media/OmnesBlack.ttf": "/leaderboard/build/static/media/OmnesBlack.c4d8a67bd6359132ef90.ttf",
+    "static/media/Eurostile.otf": "/leaderboard/build/static/media/Eurostile.5af602eec7a5fddc3fd4.otf",
+    "static/media/good_times.OTF": "/leaderboard/build/static/media/good_times.a86d4f7f5cdb8cf2e409.OTF",
+    "index.html": "/leaderboard/build/index.html",
+    "main.fefca9fd.css.map": "/leaderboard/build/static/css/main.fefca9fd.css.map",
+    "main.69f9bd66.js.map": "/leaderboard/build/static/js/main.69f9bd66.js.map",
+    "714.5f9c9d50.chunk.js.map": "/leaderboard/build/static/js/714.5f9c9d50.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.fefca9fd.css",
+    "static/js/main.69f9bd66.js"
+  ]
+}
