@@ -10,3 +10,4 @@ Pour voir prévisualisation :
 npm start
 dans App.js (changer le nom en rouge 
 du leaderboard stizo cup pour le lien)
+
