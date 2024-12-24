@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/leaderboard/build/static/css/main.0725c15c.css",
-    "main.js": "/leaderboard/build/static/js/main.0d42485e.js",
+    "main.js": "/leaderboard/build/static/js/main.39b882b5.js",
     "static/js/714.5f9c9d50.chunk.js": "/leaderboard/build/static/js/714.5f9c9d50.chunk.js",
     "static/media/reddysh_royale_background.png": "/leaderboard/build/static/media/reddysh_royale_background.84434ba45ecdd7c68360.png",
     "static/media/test_leaderboard.PNG": "/leaderboard/build/static/media/test_leaderboard.c8648655f718008cdf89.PNG",
@@ -14,11 +14,11 @@
     "static/media/good_times.OTF": "/leaderboard/build/static/media/good_times.a86d4f7f5cdb8cf2e409.OTF",
     "index.html": "/leaderboard/build/index.html",
     "main.0725c15c.css.map": "/leaderboard/build/static/css/main.0725c15c.css.map",
-    "main.0d42485e.js.map": "/leaderboard/build/static/js/main.0d42485e.js.map",
+    "main.39b882b5.js.map": "/leaderboard/build/static/js/main.39b882b5.js.map",
     "714.5f9c9d50.chunk.js.map": "/leaderboard/build/static/js/714.5f9c9d50.chunk.js.map"
   },
   "entrypoints": [
     "/leaderboard/static/css/main.0725c15c.css",
-    "/leaderboard/static/js/main.0d42485e.js"
+    "/leaderboard/static/js/main.39b882b5.js"
   ]
 }
