@@ -2,7 +2,7 @@ Pour actualisation hébergement :
 npm run build
 /leaderboard/ dans asset-manifest.json
 git add .
-git commit -m "first commit"
+git commit -m "erreur pseudo"
 git push -u origin master
 
 
