@@ -287,14 +287,14 @@ html, body {
 .stizo_cup .leaderboard_container {
   width: 1920px;
   height: 1080px;
-  background: #b94745; /* Couleur de fond */
-  background-image: url(""); /* Image de fond */
+  background: ;  /* Couleur de fond */
+  background-image: url("leaderboard_ts4.png"); /* Image de fond */
 }
 .stizo_cup .row_container {
   display: flex;
   gap: 15px;
   color:#ffffff; /* init noir */
-  box-shadow: inset 0 0 0 5px #000000; /* init noir */
+  box-shadow: inset 0 0 0 5px #ffffff; /* init noir */
 }
 .stizo_cup .row_container .rank_container {
   height: 62px;
