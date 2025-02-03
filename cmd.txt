@@ -2,7 +2,7 @@ Pour actualisation hébergement :
 npm run build
 /leaderboard/ dans asset-manifest.json
 git add .
-git commit -m "changement couleur test2"
+git commit -m "leaderboard art'arena modif link"
 git push -u origin master
 
 
