@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/leaderboard/build/static/css/main.20b722f5.css",
-    "main.js": "/leaderboard/build/static/js/main.bc51f713.js",
+    "main.css": "/leaderboard/build/static/css/main.aebe5f6c.css",
+    "main.js": "/leaderboard/build/static/js/main.5cf40c63.js",
     "static/js/453.98276a77.chunk.js": "/leaderboard/build/static/js/453.98276a77.chunk.js",
     "static/media/background_artarena.png": "/leaderboard/build/static/media/background_artarena.da465dab880234817cca.png",
     "static/media/reddysh_royale_background.png": "/leaderboard/build/static/media/reddysh_royale_background.84434ba45ecdd7c68360.png",
@@ -13,12 +13,12 @@
     "static/media/Eurostile.otf": "/leaderboard/build/static/media/Eurostile.5af602eec7a5fddc3fd4.otf",
     "static/media/good_times.OTF": "/leaderboard/build/static/media/good_times.a86d4f7f5cdb8cf2e409.OTF",
     "index.html": "/leaderboard/build/index.html",
-    "main.20b722f5.css.map": "/leaderboard/build/static/css/main.20b722f5.css.map",
-    "main.bc51f713.js.map": "/leaderboard/build/static/js/main.bc51f713.js.map",
+    "main.aebe5f6c.css.map": "/leaderboard/build/static/css/main.aebe5f6c.css.map",
+    "main.5cf40c63.js.map": "/leaderboard/build/static/js/main.5cf40c63.js.map",
     "453.98276a77.chunk.js.map": "/leaderboard/build/static/js/453.98276a77.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.20b722f5.css",
-    "static/js/main.bc51f713.js"
+    "/leaderboard/static/css/main.aebe5f6c.css",
+    "/leaderboard/static/js/main.5cf40c63.js"
   ]
 }
