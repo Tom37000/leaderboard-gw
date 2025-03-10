@@ -20,8 +20,8 @@ function LeaderboardReddyshRoyale() {
     const leaderboard_id = new URLSearchParams(useLocation().search).get('id');
 
     const [leaderboard, setLeaderboard] = useState(null)
-    const [page, setPage] = useState([0, 8]) // Changer le nombres d'équipes par page
-    const [teamsPerPage, setTeamsPerPage] = useState(8) // Changer le nombres d'équipes par page
+    const [page, setPage] = useState([0, 11]) // Changer le nombres d'équipes par page
+    const [teamsPerPage, setTeamsPerPage] = useState(11) // Changer le nombres d'équipes par page
 
     useEffect(() => {
         fetch("https://api.wls.gg/v5/leaderboards/"+leaderboard_id)
