@@ -15,7 +15,7 @@ function App() {
         <Routes >
           <Route path="/wolt_leaderboard" element={<LeaderboardWolt />} />
           <Route path="/reddysh_royale_leaderboard" element={<LeaderboardReddyshRoyale />} />
-          <Route path="/artm_arena_leaderboard" element={<LeaderboardStizoCup />} />
+          <Route path="/cdf_revenja_leaderboard" element={<LeaderboardStizoCup />} />
           <Route path="/twitch_polls" element={<TwitchPolls />} />
           <Route path="/carry_ton_noob_leaderboard" element={<LeaderboardTCS />} />
         </Routes >
