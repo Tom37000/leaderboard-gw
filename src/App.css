@@ -304,8 +304,8 @@ html, body {
 .stizo_cup .leaderboard_container {
   width: 1920px;
   height: 1080px;
-  /*background: ;   Couleur de fond */
-  background-image: url("background_artarena.png"); /* Image de fond */
+  background: transparent;
+  background-image: url(""); /* Image de fond */
 }
 .stizo_cup .row_container {
   display: flex;
