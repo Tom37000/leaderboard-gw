@@ -304,14 +304,14 @@ html, body {
 .stizo_cup .leaderboard_container {
   width: 1920px;
   height: 1080px;
-  background: #91e6fd;   /*  Couleur de fond */
-  background-image: url(""); /* Image de fond */
+  /*background: ;   Couleur de fond */
+  background-image: url("background_artarena.png"); /* Image de fond */
 }
 .stizo_cup .row_container {
   display: flex;
   gap: 15px;
-  color:#000000; /* init noir */
-  box-shadow: inset 0 0 0 5px #000000; /* init noir */
+  color:#ffffff; /* init noir */
+  box-shadow: inset 0 0 0 5px #d639ad; /* init noir */
   opacity: 0;
   animation: fadeIn 0.5s forwards;
   animation-delay: calc(var(--animation-order) * 0.1s);
@@ -347,13 +347,13 @@ html, body {
   background-color: transparent;
   font-family: "Eurostile";
   font-size: 26px;
-  color: #000000; /* init blanc */
+  color: #ffffff; /* init blanc */
 }
 .stizo_cup .header_container {
   display: flex;
   gap: 15px;
-  box-shadow: inset 0 0 0 5px #000000; /* init blanc */
-  background-color: #91e6fd; /* init blanc */
+  box-shadow: inset 0 0 0 5px #d639ad; /* init blanc */
+  background-color: #d639ad; /* init blanc */
 }
 .stizo_cup .header_container .rank_header {
   width: 90px;
@@ -363,7 +363,7 @@ html, body {
   justify-content: center;
   align-items: center;
   gap: 36px;
-  color: #000000; /* init noir */
+  color: #ffffff; /* init noir */
   font-family: "Eurostile";
 }
 .stizo_cup .header_container .name_header {
@@ -373,7 +373,7 @@ html, body {
   justify-content: center;
   align-items: center;
   gap: 36px;
-  color: #000000; /* init noir */
+  color: #ffffff; /* init noir */
   font-family: "Eurostile";
 }
 .stizo_cup .header_container .info_header {
@@ -382,7 +382,7 @@ html, body {
   display: flex;
   justify-content: center;
   align-items: center;
-  color: #000000; /* init noir */
+  color: #ffffff; /* init noir */
   font-family: "Eurostile";
 }
 
