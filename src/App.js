@@ -5,6 +5,7 @@ import LeaderboardWolt from './LeaderboardWolt';
 import LeaderboardReddyshRoyale from './LeaderboardReddyshRoyale'
 import LeaderboardStizoCup from './LeaderboardStizoCup'
 import LeaderboardTCS from './LeaderboardTCS';
+import Leaderboard2R from './Leaderboard2R';
 import TwitchPolls from './TwitchPolls';
 
 
@@ -18,6 +19,7 @@ function App() {
           <Route path="/stizo_leaderboard" element={<LeaderboardStizoCup />} />
           <Route path="/twitch_polls" element={<TwitchPolls />} />
           <Route path="/carry_ton_noob_leaderboard" element={<LeaderboardTCS />} />
+          <Route path="/2r_leaderboard" element={<Leaderboard2R />} />
         </Routes >
       </Router>
     );

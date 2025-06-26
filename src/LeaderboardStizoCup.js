@@ -3,20 +3,101 @@ import React, { useState, useEffect } from "react";
 import { useLocation } from 'react-router-dom';
 import './App.css';
 
-function Row({ rank, teamname, points, elims, avg_place, wins, games, order, showGamesColumn, onClick, positionChange }) {
+function Row({ rank, teamname, points, elims, avg_place, wins, games, order, showGamesColumn, onClick, positionChange, showPositionIndicators }) {
     const renderPositionChange = () => {
+        if (!showPositionIndicators) {
+            return null;
+        }
+        
+        const getIndicatorStyle = (type) => {
+            const baseStyle = {
+                padding: '1px 4px',
+                borderRadius: '3px',
+                fontSize: '9px',
+                fontWeight: 'bold',
+                border: '1px solid',
+                minWidth: '16px',
+                textAlign: 'center',
+                display: 'inline-block'
+            };
+
+            if (type === 'neutral') {
+                return {
+                    ...baseStyle,
+                    backgroundColor: '#666',
+                    color: '#fff',
+                    borderColor: '#666'
+                };
+            } else if (type === 'positive') {
+                return {
+                    ...baseStyle,
+                    backgroundColor: '#4CAF50',
+                    color: '#fff',
+                    borderColor: '#4CAF50',
+                    animation: 'indicatorPulse 1s ease-in-out 3'
+                };
+            } else {
+                return {
+                    ...baseStyle,
+                    backgroundColor: '#f44336',
+                    color: '#fff',
+                    borderColor: '#f44336',
+                    animation: 'indicatorPulse 1s ease-in-out 3'
+                };
+            }
+        };
+
         if (positionChange === 0) {
-            return <span className='position_change neutral'>=</span>;
+            return <span className='position_change neutral' style={getIndicatorStyle('neutral')}>=</span>;
         }
         if (positionChange > 0) {
-            return <span className='position_change positive'>+{positionChange}</span>;
+            return <span className='position_change positive' style={getIndicatorStyle('positive')}>+{positionChange}</span>;
         } else {
-            return <span className='position_change negative'>{positionChange}</span>;
+            return <span className='position_change negative' style={getIndicatorStyle('negative')}>{positionChange}</span>;
         }
     };
 
+    const getAnimationStyle = () => {
+        if (positionChange === 0) return {};
+        
+        const rowHeight = 60;
+        const realDistance = Math.abs(positionChange) * rowHeight;
+        
+        const baseSpeed = 120; 
+        const minDuration = 0.6; 
+        const maxDuration = 2.5; 
+        
+        let calculatedDuration = realDistance / baseSpeed;
+        calculatedDuration = Math.max(minDuration, Math.min(maxDuration, calculatedDuration));
+        
+        const fromPosition = positionChange > 0 ? realDistance : -realDistance;
+        
+        return {
+            '--slide-from': `${fromPosition}px`,
+            '--slide-to': '0px',
+            animation: `slideFromTo ${calculatedDuration}s cubic-bezier(0.1, 0, 0.9, 1)`
+        };
+    };
+
+    const getRowClasses = () => {
+        let classes = 'row_container';
+        if (Math.abs(positionChange) >= 3) {
+            if (positionChange > 0) {
+                classes += ' big_move_up';
+            } else {
+                classes += ' big_move_down';
+            }
+        }
+        return classes;
+    };
+
     return (
-        <div className='row_container' style={{ '--animation-order': order }}>
+        <div className={getRowClasses()} style={{ 
+            '--animation-order': order,
+            opacity: 1,
+            animation: 'none',
+            ...getAnimationStyle()
+        }}>
             <div className='rank_container'>
                 {rank}
                 {renderPositionChange()}
@@ -44,6 +125,10 @@ function LeaderboardReddyshRoyale() {
     const [showGamesColumn, setShowGamesColumn] = useState(false);
     const [selectedTeam, setSelectedTeam] = useState(null);
     const [teamDetails, setTeamDetails] = useState({});
+    const [previousPositions, setPreviousPositions] = useState({});
+    const [lastChangeTime, setLastChangeTime] = useState(Date.now());
+    const [showPositionIndicators, setShowPositionIndicators] = useState(false);
+    const [hasRefreshedOnce, setHasRefreshedOnce] = useState(false);
 
     useEffect(() => {
         const loadAllPages = async () => {
@@ -54,8 +139,11 @@ function LeaderboardReddyshRoyale() {
                 let allLeaderboardData = [];
                 let allDetails = {};
                 let hasMultipleGames = false;
+                
                 const totalPages = firstData.total_pages || 1;
                 setTotalApiPages(totalPages);
+                
+                // Load all pages
                 const promises = [];
                 for (let page = 0; page < totalPages; page++) {
                     promises.push(
@@ -65,18 +153,20 @@ function LeaderboardReddyshRoyale() {
                 }
                 
                 const allPagesData = await Promise.all(promises);
+                
                 allPagesData.forEach(data => {
                     for (let team in data.teams) {
                         const sessionKeys = Object.keys(data.teams[team].sessions).sort((a, b) => parseInt(a) - parseInt(b));
                         const sessions = sessionKeys.map(key => data.teams[team].sessions[key]);
                         const gamesCount = sessions.length;
                         const members = Object.values(data.teams[team].members);
+                        members.sort((a, b) => a.id.localeCompare(b.id));
                         const teamname = members.map(member => member.name).join(' - ');
                         
                         if (gamesCount > 1) {
                             hasMultipleGames = true;
                         }
-                    
+                        
                         allDetails[teamname] = {
                             members: members,
                             sessions: sessions,
@@ -94,16 +184,29 @@ function LeaderboardReddyshRoyale() {
                         });
                     }
                 });
-                allLeaderboardData.sort((a, b) => a.place - b.place);
+                
+                allLeaderboardData.sort((a, b) => {
+                    if (a.place !== b.place) {
+                        return a.place - b.place;
+                    }
+                    return b.points - a.points;
+                });
+                
                 const storageKey = `leaderboard_positions_${leaderboard_id}`;
                 const previousPositions = JSON.parse(localStorage.getItem(storageKey) || '{}');
+                const lastChangeTimeKey = `last_change_time_${leaderboard_id}`;
+                const storedLastChangeTime = localStorage.getItem(lastChangeTimeKey);
                 
+                let hasChanges = false;
                 const updatedLeaderboardData = allLeaderboardData.map(team => {
                     const previousPosition = previousPositions[team.teamname];
                     let positionChange = 0;
                     
                     if (previousPosition !== undefined) {
                         positionChange = previousPosition - team.place; 
+                        if (positionChange !== 0) {
+                            hasChanges = true;
+                        }
                     }
                     
                     return {
@@ -118,6 +221,30 @@ function LeaderboardReddyshRoyale() {
                 });
                 localStorage.setItem(storageKey, JSON.stringify(currentPositions));
                 
+                const now = Date.now();
+                
+                if (hasRefreshedOnce) {
+                    if (hasChanges) {
+                        setLastChangeTime(now);
+                        localStorage.setItem(lastChangeTimeKey, now.toString());
+                        setShowPositionIndicators(true);
+                    } else if (storedLastChangeTime) {
+                        const timeSinceLastChange = now - parseInt(storedLastChangeTime);
+                        const fiveMinutes = 5 * 60 * 1000; 
+                        
+                        if (timeSinceLastChange > fiveMinutes) {
+                            setShowPositionIndicators(false);
+                        }
+                    }
+                } else {
+                    setHasRefreshedOnce(true);
+                    setShowPositionIndicators(false);
+                    if (!storedLastChangeTime) {
+                        setLastChangeTime(now);
+                        localStorage.setItem(lastChangeTimeKey, now.toString());
+                    }
+                }
+                
                 setShowGamesColumn(hasMultipleGames);
                 setLeaderboard(updatedLeaderboardData);
                 setTeamDetails(allDetails);
@@ -127,6 +254,10 @@ function LeaderboardReddyshRoyale() {
         };
         
         loadAllPages();
+        
+        const interval = setInterval(loadAllPages, 30000);
+        
+        return () => clearInterval(interval);
     }, [leaderboard_id]);
 
     useEffect(() => {
@@ -157,7 +288,19 @@ function LeaderboardReddyshRoyale() {
 
     function nextPage() {
         const filteredLeaderboard = leaderboard
-            ? leaderboard.filter(team => team.teamname.toLowerCase().includes(searchQuery.toLowerCase()))
+            ? leaderboard.filter(team => {
+                // Search by team name
+                if (team.teamname.toLowerCase().includes(searchQuery.toLowerCase())) {
+                    return true;
+                }
+                // Search by ingame_name of team members
+                if (teamDetails[team.teamname] && teamDetails[team.teamname].members) {
+                    return teamDetails[team.teamname].members.some(member => 
+                        member.ingame_name && member.ingame_name.toLowerCase().includes(searchQuery.toLowerCase())
+                    );
+                }
+                return false;
+            })
             : [];
         const maxPages = Math.ceil(filteredLeaderboard.length / 10) - 1;
         
@@ -173,7 +316,19 @@ function LeaderboardReddyshRoyale() {
     }
 
     const filteredLeaderboard = leaderboard
-        ? leaderboard.filter(team => team.teamname.toLowerCase().includes(searchQuery.toLowerCase()))
+        ? leaderboard.filter(team => {
+            // Search by team name
+            if (team.teamname.toLowerCase().includes(searchQuery.toLowerCase())) {
+                return true;
+            }
+            // Search by ingame_name of team members
+            if (teamDetails[team.teamname] && teamDetails[team.teamname].members) {
+                return teamDetails[team.teamname].members.some(member => 
+                    member.ingame_name && member.ingame_name.toLowerCase().includes(searchQuery.toLowerCase())
+                );
+            }
+            return false;
+        })
         : [];
     const startIndex = localPage * 10;
     const endIndex = startIndex + 10;
@@ -186,7 +341,7 @@ function LeaderboardReddyshRoyale() {
                 <div className='search_container'>
                     <input
                         type="text"
-                        placeholder="Rechercher un joueur"
+                        placeholder="Rechercher une équipe"
                         className="search_input"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -219,6 +374,7 @@ function LeaderboardReddyshRoyale() {
                             showGamesColumn={showGamesColumn}
                             onClick={() => handleTeamClick(data.teamname)}
                             positionChange={data.positionChange || 0}
+                            showPositionIndicators={showPositionIndicators}
                         />
                     )}
                 </div>
@@ -234,7 +390,7 @@ function LeaderboardReddyshRoyale() {
                         </div>
                         <div className='modal_body'>
                             <div className='team_summary'>
-                                <h3>Résumé de l'équipe</h3>
+                                <h3>Résumé de l'équipe :</h3>
                                 <div className='stats_grid'>
                                     <div className='stat_item'>
                                         <span className='stat_label'>Classement:</span>
@@ -245,7 +401,7 @@ function LeaderboardReddyshRoyale() {
                                         <span className='stat_value'>{teamDetails[selectedTeam].teamData.points}</span>
                                     </div>
                                     <div className='stat_item'>
-                                        <span className='stat_label'>Parties jouées:</span>
+                                        <span className='stat_label'>Parties jouées :</span>
                                         <span className='stat_value'>{teamDetails[selectedTeam].sessions.length}</span>
                                     </div>
                                     <div className='stat_item'>
@@ -285,7 +441,7 @@ function LeaderboardReddyshRoyale() {
                             </div>
                             
                             <div className='members_section'>
-                                <h3>Membres de l'équipe</h3>
+                                <h3>Membre(s) de l'équipe :</h3>
                                 <div className='members_grid'>
                                     {teamDetails[selectedTeam].members.map((member, index) => (
                                         <div key={index} className='member_card'>
@@ -296,7 +452,7 @@ function LeaderboardReddyshRoyale() {
                             </div>
                             
                             <div className='sessions_section'>
-                                <h3>Historique détaillé des parties</h3>
+                                <h3>Historique détaillé des games :</h3>
                                 <div className='sessions_table'>
                                     <div className='session_header'>
                                         <div>Game</div>
@@ -305,9 +461,9 @@ function LeaderboardReddyshRoyale() {
                                     </div>
                                     {teamDetails[selectedTeam].sessions.map((session, index) => (
                                         <div key={index} className='session_row'>
-                                            <div style={{color: '#ee4a54', fontWeight: 'bold'}}>{index + 1}</div>
+                                            <div className='session_highlight'>{index + 1}</div>
                                             <div className={`place_${session.place <= 3 ? 'top' : session.place <= 10 ? 'good' : 'normal'}`}>{session.place}</div>
-                                            <div style={{color: '#ee4a54', fontWeight: 'bold'}}>{session.kills}</div>
+                                            <div className='session_highlight'>{session.kills}</div>
                                         </div>
                                     ))}
                                 </div>

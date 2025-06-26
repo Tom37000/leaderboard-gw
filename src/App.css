@@ -1,9 +1,10 @@
 
 :root {
-  --team-stats-label-color: #f5a71a;       
-  --team-stats-value-color: #f5a71a;    
-  --team-stats-header-color: #f5a71a;       
+  --team-stats-label-color: #fffff;       
+  --team-stats-value-color: #fffff;    
+  --team-stats-header-color: #f9be07;       
 }
+
 
 @font-face {
   font-family: "OmnesBlack";
@@ -36,12 +37,66 @@
   font-style: normal;
 }
 @keyframes fadeIn {
-  from {
+  0% {
     opacity: 0;
     transform: translateY(20px);
   }
-  to {
+  100% {
     opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes positionChange {
+  0% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(var(--move-distance));
+  }
+  60% {
+    transform: translateY(calc(var(--move-distance) * 0.3));
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes indicatorPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes slideFromTo {
+  0% {
+    transform: translateY(var(--slide-from));
+  }
+  100% {
+    transform: translateY(var(--slide-to));
+  }
+}
+
+@keyframes slideUp {
+  0% {
+    transform: translateY(var(--slide-distance));
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  0% {
+    transform: translateY(calc(var(--slide-distance) * -1));
+  }
+  100% {
     transform: translateY(0);
   }
 }
@@ -58,6 +113,8 @@ html, body {
   opacity: 0;
   animation: fadeIn 0.5s forwards;
   animation-delay: calc(var(--animation-order) * 0.1s);
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateY(0);
 }
 .row_container .name_container {
   height: 55.04px;
@@ -393,6 +450,157 @@ html, body {
   color: #fff; /* init noir */
   font-family: "Eurostile";
 }
+.stizo_cup .search_container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  position: absolute;
+  top: 114px;
+  width: 100%;
+  z-index: 10;
+}
+
+.stizo_cup .search_input {
+  background-color: #f5a71a;
+  border: 2px solid #000000;
+  border-radius: 10px;
+  padding: 10px 15px;
+  font-family: "Eurostile";
+  font-size: 18px;
+  color: #000000;
+  width: 300px;
+  outline: none;
+}
+
+.stizo_cup .search_input::placeholder {
+  color: #000000;
+  opacity: 0.7;
+}
+
+.summer2r_cup .leaderboard_table {
+  position: absolute;
+  width: 100%;
+  height: fit-content;
+  top: 166px;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.summer2r_cup .leaderboard_container {
+  width: 1920px;
+   height: 1080px;
+  /* background: #91e6fd;  couleur de fond */
+  background-image: url("Affiche2r_classement.png"); /* Image de fond */
+}
+.summer2r_cup .row_container {
+  display: flex;
+  gap: 15px;
+  color: #ffffff; /* init noir */
+  box-shadow: inset 0 0 0 5px #f9be07; /* init noir */
+  opacity: 0;
+  animation: fadeIn 0.5s forwards;
+  animation-delay: calc(var(--animation-order) * 0.1s);
+}
+.summer2r_cup .row_container .rank_container {
+  height: 62px;
+  width: 90px;
+  margin-left: 5px;
+  background-color: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 26px;
+  font-family: "Eurostile";
+}
+.summer2r_cup .row_container .name_container {
+  height: 58px;
+  width: 579px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  background-color: transparent;
+  font-family: "Eurostile";
+  font-size: 26px;
+}
+.summer2r_cup .row_container .info_box {
+  height: 58px;
+  width: 118.99px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  font-family: "Eurostile";
+  font-size: 26px;
+  color: #ffffff; /* init blanc */
+}
+.summer2r_cup .header_container {
+  display: flex;
+  gap: 15px;
+  box-shadow: inset 0 0 0 5px #f9be07; /* init blanc */
+  background-color: #f9be07; /* init blanc */
+}
+.summer2r_cup .header_container .rank_header {
+  width: 90px;
+  height: 62px;
+  margin-left: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 36px;
+  color: #ffffff; /* init noir */
+  font-family: "Eurostile";
+}
+.summer2r_cup .header_container .name_header {
+  width: 579px;
+  height: 62px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 36px;
+  color: #ffffff; /* init noir */
+  font-family: "Eurostile";
+}
+.summer2r_cup .header_container .info_header {
+  width: 118.99px;
+  height: 62px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #ffffff; /* init noir */
+  font-family: "Eurostile";
+}
+
+.summer2r_cup .search_container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  position: absolute;
+  top: 970px;
+  width: 100%;
+  z-index: 10;
+}
+
+.summer2r_cup .search_input {
+  background-color: var(--team-stats-value-color);
+  border: 2px solid #000000;
+  border-radius: 10px;
+  padding: 10px 15px;
+  font-family: "Eurostile";
+  font-size: 18px;
+  color: #000000;
+  width: 300px;
+  outline: none;
+}
+
+.summer2r_cup .search_input::placeholder {
+  color: #000000;
+  opacity: 0.7;
+}
 
 .tcs .leaderboard_table {
   position: absolute;
@@ -516,6 +724,25 @@ html, body {
   border: 2px solid #333;
 }
 
+/* Custom scrollbar for modal */
+.modal_content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal_content::-webkit-scrollbar-track {
+  background: #2a2a2a;
+  border-radius: 4px;
+}
+
+.modal_content::-webkit-scrollbar-thumb {
+  background: var(--team-stats-header-color);
+  border-radius: 4px;
+}
+
+.modal_content::-webkit-scrollbar-thumb:hover {
+  background: #d030d0;
+}
+
 .modal_header {
   display: flex;
   justify-content: space-between;
@@ -545,7 +772,7 @@ html, body {
 }
 
 .close_button:hover {
-  color: #ee4a54;
+  color : var(--team-stats-header-color);
 }
 
 .modal_body {
@@ -583,22 +810,24 @@ html, body {
 
 .session_header {
   display: grid;
-  grid-template-columns: 80px 80px 100px;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 10px;
   padding: 10px;
   background-color: #333;
   border-radius: 5px;
   font-weight: bold;
+  text-align: center;
 }
 
 .session_row {
   display: grid;
-  grid-template-columns: 80px 80px 100px;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 10px;
   padding: 8px 10px;
   background-color: #3a3a3a;
   border-radius: 3px;
   align-items: center;
+  text-align: center;
 }
 
 .session_row:hover {
@@ -620,7 +849,7 @@ html, body {
   padding: 8px 12px;
   background-color: #333;
   border-radius: 5px;
-  border-left: 3px solid #ee4a54;
+  border-left: 3px solid var(--team-stats-header-color);
 }
 
 .stat_label {
@@ -650,91 +879,95 @@ html, body {
 }
 
 .place_top {
-  color: #ee4a54;
+  color: var(--team-stats-value-color);
   font-weight: bold;
 }
 
 .place_good {
-  color: #ee4a54;
+  color: var(--team-stats-value-color);
   font-weight: bold;
 }
 
 .place_normal {
-  color: #ee4a54;
+  color: var(--team-stats-value-color);
 }
 
 .points_cell {
   font-weight: bold;
-  color: #ee4a54;
+  color: var(--team-stats-label-color);
 }
 
-.performance_excellent {
-  color: #ee4a54;
+.session_highlight {
+  color: var(--team-stats-value-color);
   font-weight: bold;
 }
 
-.performance_good {
-  color: #ee4a54;
-  font-weight: bold;
-}
-
-.performance_average {
-  color: #ee4a54;
-}
-
-.performance_poor {
-  color: #ee4a54;
-}
-
-.stizo_cup .search_container {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 20px;
-  position: absolute;
-  top: 114px;
-  width: 100%;
-  z-index: 10;
-}
-
-.stizo_cup .search_input {
-  background-color: #f5a71a;
-  border: 2px solid #000000;
-  border-radius: 10px;
-  padding: 10px 15px;
-  font-family: "Eurostile";
-  font-size: 18px;
-  color: #000000;
-  width: 300px;
-  outline: none;
-}
-
-.stizo_cup .search_input::placeholder {
-  color: #000000;
-  opacity: 0.7;
-}
 
 .position_change {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: bold;
-  margin-left: 8px;
-  padding: 2px 6px;
-  border-radius: 4px;
+  margin-left: 10px;
+  padding: 4px 8px;
+  border-radius: 6px;
   display: inline-block;
+  min-width: 24px;
+  text-align: center;
+  border: 2px solid transparent;
 }
 
 .position_change.positive {
-  color: #00ff00;
-  background-color: rgba(0, 255, 0, 0.1);
+  color: #ffffff !important;
+  background-color: #4CAF50 !important;
+  border-color: #66BB6A !important;
+  box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3) !important;
+  animation: indicatorPulse 1s ease-in-out 3;
 }
 
 .position_change.negative {
-  color: #ff0000;
-  background-color: rgba(255, 0, 0, 0.1);
+  color: #ffffff !important;
+  background-color: #f44336 !important;
+  border-color: #EF5350 !important;
+  box-shadow: 0 2px 4px rgba(244, 67, 54, 0.3) !important;
+  animation: indicatorPulse 1s ease-in-out 3;
 }
 
 .position_change.neutral {
-  color: #888888;
-  background-color: rgba(136, 136, 136, 0.1);
+  color: #ffffff !important;
+  background-color: #757575 !important;
+  border-color: #9E9E9E !important;
+  box-shadow: 0 2px 4px rgba(117, 117, 117, 0.3) !important;
 }
+
+/* Styles spécifiques pour stizo_cup pour s'assurer que les couleurs s'affichent */
+.summer2r_cup .position_change.positive {
+  color: #ffffff !important;
+  background-color: #4CAF50 !important;
+  border: 2px solid #66BB6A !important;
+}
+
+.summer2r_cup .position_change.negative {
+  color: #ffffff !important;
+  background-color: #f44336 !important;
+  border: 2px solid #EF5350 !important;
+}
+
+.summer2r_cup .position_change.neutral {
+  color: #ffffff !important;
+  background-color: #757575 !important;
+  border: 2px solid #9E9E9E !important;
+}
+
+/* Enhanced visual effects for significant position changes - disabled for consistent colors */
+.row_container.big_move_up {
+  /* box-shadow: 0 0 15px rgba(76, 175, 80, 0.4); */
+  /* border-left: 3px solid #4CAF50; */
+}
+
+.row_container.big_move_down {
+  /* box-shadow: 0 0 15px rgba(244, 67, 54, 0.4); */
+  /* border-left: 3px solid #f44336; */
+}
+
+
 
 /*# sourceMappingURL=App.css.map */
