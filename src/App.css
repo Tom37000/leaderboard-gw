@@ -62,17 +62,7 @@
   }
 }
 
-@keyframes indicatorPulse {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
+
 
 @keyframes slideFromTo {
   0% {
@@ -919,23 +909,18 @@ html, body {
   color: #ffffff !important;
   background-color: #4CAF50 !important;
   border-color: #66BB6A !important;
-  box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3) !important;
-  animation: indicatorPulse 1s ease-in-out 3;
 }
 
 .position_change.negative {
   color: #ffffff !important;
   background-color: #f44336 !important;
   border-color: #EF5350 !important;
-  box-shadow: 0 2px 4px rgba(244, 67, 54, 0.3) !important;
-  animation: indicatorPulse 1s ease-in-out 3;
 }
 
 .position_change.neutral {
   color: #ffffff !important;
   background-color: #757575 !important;
   border-color: #9E9E9E !important;
-  box-shadow: 0 2px 4px rgba(117, 117, 117, 0.3) !important;
 }
 
 .summer2r_cup .position_change.positive {
@@ -956,16 +941,7 @@ html, body {
   border: 2px solid #9E9E9E !important;
 }
 
-/* Enhanced visual effects for significant position changes - disabled for consistent colors */
-.row_container.big_move_up {
-  /* box-shadow: 0 0 15px rgba(76, 175, 80, 0.4); */
-  /* border-left: 3px solid #4CAF50; */
-}
 
-.row_container.big_move_down {
-  /* box-shadow: 0 0 15px rgba(244, 67, 54, 0.4); */
-  /* border-left: 3px solid #f44336; */
-}
 
 
 

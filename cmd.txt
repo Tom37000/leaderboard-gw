@@ -2,7 +2,7 @@ Pour actualisation hébergement :
 npm run build
 /leaderboard/ dans asset-manifest.json
 git add .
-git commit -m "leaderboard art'arena changement background"
+git commit -m ""
 git push -u origin master
 
 

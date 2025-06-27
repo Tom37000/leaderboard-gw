@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation } from 'react-router-dom';
 import './App.css';
 
-function Row({ rank, teamname, points, elims, avg_place, wins, games, order, showGamesColumn, onClick, positionChange, showPositionIndicators, animationEnabled }) {
+function Row({ rank, teamname, points, elims, avg_place, wins, games, order, showGamesColumn, onClick, positionChange, showPositionIndicators, animationEnabled, hasPositionChanged }) {
     const renderPositionChange = () => {
         if (!showPositionIndicators) {
             return null;
@@ -11,20 +11,36 @@ function Row({ rank, teamname, points, elims, avg_place, wins, games, order, sho
         
         const getIndicatorStyle = (type, value) => {
             const textLength = String(value).length;
-            const dynamicWidth = Math.max(24, textLength * 12 + 12);
+            let baseWidth, fontSize, padding;
+            if (textLength === 1) {
+                baseWidth = 20;
+                fontSize = 11;
+                padding = '2px 6px';
+            } else if (textLength === 2) {
+                baseWidth = 26;
+                fontSize = 10;
+                padding = '2px 5px';
+            } else if (textLength === 3) {
+                baseWidth = 32;
+                fontSize = 9;
+                padding = '2px 4px';
+            } else { // 4+ chiffres
+                baseWidth = 38;
+                fontSize = 8;
+                padding = '2px 3px';
+            }
+            
             const teamNameLength = teamname.length;
             let scaleFactor = 1;
             if (teamNameLength > 20) {
-                scaleFactor = 0.7;
-            } else if (teamNameLength > 15) {
                 scaleFactor = 0.8;
-            } else if (teamNameLength > 10) {
+            } else if (teamNameLength > 15) {
                 scaleFactor = 0.9;
             }
             
-            const adjustedWidth = Math.max(18, dynamicWidth * scaleFactor);
-            const adjustedFontSize = Math.max(10, 12 * scaleFactor);
-            const adjustedPadding = scaleFactor < 1 ? '2px 4px' : '3px 6px';
+            const adjustedWidth = Math.max(baseWidth, baseWidth * scaleFactor);
+            const adjustedFontSize = Math.max(7, fontSize * scaleFactor);
+            const adjustedPadding = padding;
             
             const baseStyle = {
                 padding: adjustedPadding,
@@ -50,7 +66,7 @@ function Row({ rank, teamname, points, elims, avg_place, wins, games, order, sho
                     backgroundColor: '#4CAF50',
                     color: '#fff',
                     borderColor: '#4CAF50',
-                    animation: 'indicatorPulse 1s ease-in-out 3'
+            
                 };
             } else {
                 return {
@@ -58,23 +74,23 @@ function Row({ rank, teamname, points, elims, avg_place, wins, games, order, sho
                     backgroundColor: '#f44336',
                     color: '#fff',
                     borderColor: '#f44336',
-                    animation: 'indicatorPulse 1s ease-in-out 3'
+            
                 };
             }
         };
 
         if (positionChange === 0) {
-            return <span className='position_change neutral' style={getIndicatorStyle('neutral', '=')}>=</span>;
+            return <span className="position_change neutral" style={getIndicatorStyle('neutral', '=')}>=</span>;
         }
         if (positionChange > 0) {
-            return <span className='position_change positive' style={getIndicatorStyle('positive', `+${positionChange}`)}>+{positionChange}</span>;
+            return <span className="position_change positive" style={getIndicatorStyle('positive', `+${positionChange}`)}>+{positionChange}</span>;
         } else {
-            return <span className='position_change negative' style={getIndicatorStyle('negative', positionChange)}>{positionChange}</span>;
+            return <span className="position_change negative" style={getIndicatorStyle('negative', positionChange)}>{positionChange}</span>;
         }
     };
 
     const getAnimationStyle = () => {
-        if (positionChange === 0) return {};
+        if (!animationEnabled || positionChange === 0) return {};
         
         const rowHeight = 60;
         const realDistance = Math.abs(positionChange) * rowHeight;
@@ -97,22 +113,16 @@ function Row({ rank, teamname, points, elims, avg_place, wins, games, order, sho
 
     const getRowClasses = () => {
         let classes = 'row_container';
-        if (Math.abs(positionChange) >= 3) {
-            if (positionChange > 0) {
-                classes += ' big_move_up';
-            } else {
-                classes += ' big_move_down';
-            }
-        }
+
         return classes;
     };
 
     return (
         <div className={getRowClasses()} style={{ 
             '--animation-order': order,
-            opacity: animationEnabled ? 0 : 1,
-            animation: animationEnabled ? 'fadeIn 0.5s forwards' : 'none',
-            animationDelay: animationEnabled ? `calc(var(--animation-order) * 0.1s)` : '0s',
+            opacity: (animationEnabled && hasPositionChanged) ? 0 : 1,
+            animation: (animationEnabled && hasPositionChanged) ? 'fadeIn 0.5s forwards' : 'none',
+            animationDelay: (animationEnabled && hasPositionChanged) ? `calc(var(--animation-order) * 0.1s)` : '0s',
             ...getAnimationStyle()
         }}>
             <div className='rank_container' style={{
@@ -227,60 +237,77 @@ function LeaderboardStizoCup() {
                 
                 const storageKey = `leaderboard_positions_${leaderboard_id}`;
                 const previousPositions = JSON.parse(localStorage.getItem(storageKey) || '{}');
+                const gamesStorageKey = `leaderboard_games_${leaderboard_id}`;
+                const previousGames = JSON.parse(localStorage.getItem(gamesStorageKey) || '{}');
+                const indicatorsStorageKey = `position_indicators_${leaderboard_id}`;
+                const storedIndicators = JSON.parse(localStorage.getItem(indicatorsStorageKey) || '{}');
                 const lastChangeTimeKey = `last_change_time_${leaderboard_id}`;
                 const storedLastChangeTime = localStorage.getItem(lastChangeTimeKey);
                 
                 let hasChanges = false;
-                const updatedLeaderboardData = allLeaderboardData.map(team => {
+                const newIndicators = {};
+                const changedTeams = new Set();
+                
+                const now = Date.now();
+                const shouldClearOldIndicators = storedLastChangeTime && (now - parseInt(storedLastChangeTime)) > 120000;
+                
+                if (shouldClearOldIndicators) {
+                    localStorage.removeItem(indicatorsStorageKey);
+                    localStorage.removeItem(lastChangeTimeKey);
+                }
+                
+                allLeaderboardData.forEach(team => {
                     const previousPosition = previousPositions[team.teamname];
                     let positionChange = 0;
                     
-                    if (previousPosition !== undefined) {
-                        positionChange = previousPosition - team.place; 
+                    if (previousPosition !== undefined && previousPosition !== team.place) {
+                        positionChange = previousPosition - team.place;
                         if (positionChange !== 0) {
                             hasChanges = true;
+                            newIndicators[team.teamname] = positionChange;
+                            changedTeams.add(team.teamname);
+                        }
+                    } else if (!shouldClearOldIndicators && storedIndicators[team.teamname] !== undefined) {
+                        positionChange = storedIndicators[team.teamname];
+                        if (positionChange !== 0) {
+                            newIndicators[team.teamname] = positionChange;
                         }
                     }
-                    
+                });
+                
+                const updatedLeaderboardData = allLeaderboardData.map(team => {
                     return {
                         ...team,
-                        positionChange
+                        positionChange: newIndicators[team.teamname] || 0,
+                        hasPositionChanged: changedTeams.has(team.teamname)
                     };
                 });
-                
+            
                 const currentPositions = {};
+                const currentGames = {};
                 allLeaderboardData.forEach(team => {
                     currentPositions[team.teamname] = team.place;
+                    currentGames[team.teamname] = team.games;
                 });
                 localStorage.setItem(storageKey, JSON.stringify(currentPositions));
+                localStorage.setItem(gamesStorageKey, JSON.stringify(currentGames));
+                localStorage.setItem(indicatorsStorageKey, JSON.stringify(newIndicators));
                 
-                const now = Date.now();
+                const shouldShowIndicators = hasChanges || Object.keys(newIndicators).length > 0;
+                setShowPositionIndicators(shouldShowIndicators);
+                setHasRefreshedOnce(true);
                 
-                if (hasRefreshedOnce) {
-                    if (hasChanges) {
-                        setLastChangeTime(now);
-                        localStorage.setItem(lastChangeTimeKey, now.toString());
-                        setShowPositionIndicators(true);
-                    } else if (storedLastChangeTime) {
-                        const timeSinceLastChange = now - parseInt(storedLastChangeTime);
-                        const fiveMinutes = 5 * 60 * 1000;
-                        
-                        if (timeSinceLastChange > fiveMinutes) {
-                            setShowPositionIndicators(false);
-                        } else {
-                            setShowPositionIndicators(true); // Maintenir l'affichage si dans la fenêtre de temps
-                        }
-                    }
-                } else {
-                    setHasRefreshedOnce(true);
-                    if (storedLastChangeTime) {
-                        const timeSinceLastChange = now - parseInt(storedLastChangeTime);
-                        const fiveMinutes = 5 * 60 * 1000;
-                        setShowPositionIndicators(timeSinceLastChange <= fiveMinutes);
-                    } else {
-                        setShowPositionIndicators(false);
-                        setLastChangeTime(now);
-                        localStorage.setItem(lastChangeTimeKey, now.toString());
+                if (hasChanges) {
+                    const now = Date.now();
+                    setLastChangeTime(now);
+                    localStorage.setItem(lastChangeTimeKey, now.toString());
+                    
+                    if (changedTeams.size > 0) {
+                        setAnimationEnabled(true);
+
+                        setTimeout(() => {
+                            setAnimationEnabled(false);
+                        }, 3000); 
                     }
                 }
                 
@@ -349,12 +376,25 @@ function LeaderboardStizoCup() {
         });
     };
 
-    function nextPage() {
-        const filteredLeaderboard = filterLeaderboard(leaderboard, searchQuery);
-        const maxPages = Math.ceil(filteredLeaderboard.length / 10) - 1;
-        
-        if (localPage < maxPages) {
-            setLocalPage(localPage + 1);
+    function nextPageFromPoints() {
+        if (!showGamesColumn) {
+            const filteredLeaderboard = filterLeaderboard(leaderboard, searchQuery);
+            const maxPages = Math.ceil(filteredLeaderboard.length / 10) - 1;
+            
+            if (localPage < maxPages) {
+                setLocalPage(localPage + 1);
+            }
+        }
+    }
+
+    function nextPageFromGames() {
+        if (showGamesColumn) {
+            const filteredLeaderboard = filterLeaderboard(leaderboard, searchQuery);
+            const maxPages = Math.ceil(filteredLeaderboard.length / 10) - 1;
+            
+            if (localPage < maxPages) {
+                setLocalPage(localPage + 1);
+            }
         }
     }
 
@@ -392,8 +432,8 @@ function LeaderboardStizoCup() {
                         <div className='info_header' style={{ fontSize: '12px' }}>AVG PLACE</div>
                         <div className='info_header'>ELIMS</div>
                         <div className='info_header'>WINS</div>
-                        <div className='info_header'>POINTS</div>
-                        {showGamesColumn && <div onClick={nextPage} className='info_header'>GAMES</div>}
+                        <div className='info_header' onClick={nextPageFromPoints}>POINTS</div>
+                        {showGamesColumn && <div onClick={nextPageFromGames} className='info_header'>GAMES</div>}
                     </div>
                     {displayedLeaderboard.map((data, index) => {
                         const positionChange = Math.abs(data.positionChange || 0);
@@ -429,6 +469,7 @@ function LeaderboardStizoCup() {
                                 positionChange={data.positionChange || 0}
                                 showPositionIndicators={showPositionIndicators}
                                 animationEnabled={animationEnabled}
+                                hasPositionChanged={data.hasPositionChanged || false}
                             />
                         );
                     })}
