@@ -37,11 +37,11 @@
   font-style: normal;
 }
 @keyframes fadeIn {
-  0% {
+  from {
     opacity: 0;
     transform: translateY(20px);
   }
-  100% {
+  to {
     opacity: 1;
     transform: translateY(0);
   }
@@ -938,7 +938,6 @@ html, body {
   box-shadow: 0 2px 4px rgba(117, 117, 117, 0.3) !important;
 }
 
-/* Styles spécifiques pour stizo_cup pour s'assurer que les couleurs s'affichent */
 .summer2r_cup .position_change.positive {
   color: #ffffff !important;
   background-color: #4CAF50 !important;
