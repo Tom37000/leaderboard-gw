@@ -360,7 +360,7 @@ html, body {
   width: 1920px;
    height: 1080px;
    /* background: #f5a71a;  couleur de fond */
-  background-image: url("stizo_cup_background.png"); /* Image de fond */
+  background-image: url("stizo_cup_honda_background.png"); /* Image de fond */
 }
 .stizo_cup .row_container {
   display: flex;

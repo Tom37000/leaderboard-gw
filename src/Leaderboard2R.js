@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation } from 'react-router-dom';
 import './App.css';
 
-function Row({ rank, teamname, points, elims, avg_place, wins, games, order, showGamesColumn, onClick, positionChange, showPositionIndicators, animationEnabled, hasPositionChanged }) {
+function Row({ rank, teamname, points, elims, avg_place, wins, games, order, showGamesColumn, onClick, positionChange, showPositionIndicators, animationEnabled, hasPositionChanged, cascadeFadeEnabled, cascadeIndex }) {
     const renderPositionChange = () => {
         if (!showPositionIndicators) {
             return null;
@@ -80,7 +80,7 @@ function Row({ rank, teamname, points, elims, avg_place, wins, games, order, sho
         };
 
         if (positionChange === 0) {
-            return <span className="position_change neutral" style={getIndicatorStyle('neutral', '=')}>=</span>;
+            return null;
         }
         if (positionChange > 0) {
             return <span className="position_change positive" style={getIndicatorStyle('positive', `+${positionChange}`)}>+{positionChange}</span>;
@@ -120,9 +120,9 @@ function Row({ rank, teamname, points, elims, avg_place, wins, games, order, sho
     return (
         <div className={getRowClasses()} style={{ 
             '--animation-order': order,
-            opacity: (animationEnabled && hasPositionChanged) ? 0 : 1,
-            animation: (animationEnabled && hasPositionChanged) ? 'fadeIn 0.5s forwards' : 'none',
-            animationDelay: (animationEnabled && hasPositionChanged) ? `calc(var(--animation-order) * 0.1s)` : '0s',
+            opacity: cascadeFadeEnabled ? 0 : (animationEnabled && hasPositionChanged) ? 0 : 1,
+            animation: cascadeFadeEnabled ? 'fadeIn 0.8s forwards' : (animationEnabled && hasPositionChanged) ? 'fadeIn 0.5s forwards' : 'none',
+            animationDelay: cascadeFadeEnabled ? `${cascadeIndex * 0.1}s` : (animationEnabled && hasPositionChanged) ? `calc(var(--animation-order) * 0.1s)` : '0s',
             ...getAnimationStyle()
         }}>
             <div className='rank_container' style={{
@@ -166,11 +166,12 @@ function Leaderboard2R() {
     const [showPositionIndicators, setShowPositionIndicators] = useState(false);
     const [hasRefreshedOnce, setHasRefreshedOnce] = useState(false);
     const [animationEnabled, setAnimationEnabled] = useState(false);
+    const [cascadeFadeEnabled, setCascadeFadeEnabled] = useState(false);
 
     useEffect(() => {
         const handleKeyPress = (event) => {
             if (event.key === 'F8') {
-                setAnimationEnabled(prev => !prev);
+                setCascadeFadeEnabled(prev => !prev);
             }
         };
 
@@ -503,6 +504,8 @@ function Leaderboard2R() {
                                 showPositionIndicators={showPositionIndicators}
                                 animationEnabled={animationEnabled}
                                 hasPositionChanged={data.hasPositionChanged || false}
+                                cascadeFadeEnabled={cascadeFadeEnabled}
+                                cascadeIndex={index}
                             />
                         );
                     })}
