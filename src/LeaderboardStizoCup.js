@@ -269,6 +269,7 @@ function LeaderboardStizoCup() {
                             changedTeams.add(team.teamname);
                         }
                     } else if (!shouldClearOldIndicators && storedIndicators[team.teamname] !== undefined) {
+                        // Récupérer les indicateurs stockés mais ne pas les considérer comme de nouveaux changements
                         positionChange = storedIndicators[team.teamname];
                         if (positionChange !== 0) {
                             newIndicators[team.teamname] = positionChange;
@@ -292,24 +293,27 @@ function LeaderboardStizoCup() {
                 });
                 localStorage.setItem(storageKey, JSON.stringify(currentPositions));
                 localStorage.setItem(gamesStorageKey, JSON.stringify(currentGames));
-                localStorage.setItem(indicatorsStorageKey, JSON.stringify(newIndicators));
                 
-                const shouldShowIndicators = hasChanges || Object.keys(newIndicators).length > 0;
+                // Ne stocker les indicateurs que s'il y a de vrais changements
+                if (changedTeams.size > 0) {
+                    localStorage.setItem(indicatorsStorageKey, JSON.stringify(newIndicators));
+                }
+                
+                // Afficher les indicateurs s'il y a des changements réels ou des indicateurs stockés
+                const shouldShowIndicators = Object.keys(newIndicators).length > 0;
                 setShowPositionIndicators(shouldShowIndicators);
                 setHasRefreshedOnce(true);
                 
-                if (hasChanges) {
+                if (hasChanges && changedTeams.size > 0) {
                     const now = Date.now();
                     setLastChangeTime(now);
                     localStorage.setItem(lastChangeTimeKey, now.toString());
                     
-                    if (changedTeams.size > 0) {
-                        setAnimationEnabled(true);
+                    setAnimationEnabled(true);
 
-                        setTimeout(() => {
-                            setAnimationEnabled(false);
-                        }, 3000); 
-                    }
+                    setTimeout(() => {
+                        setAnimationEnabled(false);
+                    }, 3000); 
                 }
                 
                 setShowGamesColumn(hasMultipleGames);

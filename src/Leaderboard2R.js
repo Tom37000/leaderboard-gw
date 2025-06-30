@@ -24,7 +24,7 @@ function Row({ rank, teamname, points, elims, avg_place, wins, games, order, sho
                 baseWidth = 32;
                 fontSize = 9;
                 padding = '2px 4px';
-            } else { // 4+ chiffres
+            } else { 
                 baseWidth = 38;
                 fontSize = 8;
                 padding = '2px 3px';
@@ -295,24 +295,27 @@ function Leaderboard2R() {
                 });
                 localStorage.setItem(storageKey, JSON.stringify(currentPositions));
                 localStorage.setItem(gamesStorageKey, JSON.stringify(currentGames));
-                localStorage.setItem(indicatorsStorageKey, JSON.stringify(newIndicators));
                 
-                const shouldShowIndicators = hasChanges || Object.keys(newIndicators).length > 0;
+                // Ne stocker les indicateurs que s'il y a de vrais changements
+                if (changedTeams.size > 0) {
+                    localStorage.setItem(indicatorsStorageKey, JSON.stringify(newIndicators));
+                }
+                
+                // Afficher les indicateurs s'il y a des changements réels ou des indicateurs stockés
+                const shouldShowIndicators = Object.keys(newIndicators).length > 0;
                 setShowPositionIndicators(shouldShowIndicators);
                 setHasRefreshedOnce(true);
                 
-                if (hasChanges) {
+                if (hasChanges && changedTeams.size > 0) {
                     const now = Date.now();
                     setLastChangeTime(now);
                     localStorage.setItem(lastChangeTimeKey, now.toString());
                     
-                    if (changedTeams.size > 0) {
-                        setAnimationEnabled(true);
-                        
-                        setTimeout(() => {
-                            setAnimationEnabled(false);
-                        }, 3000); 
-                    }
+                    setAnimationEnabled(true);
+                    
+                    setTimeout(() => {
+                        setAnimationEnabled(false);
+                    }, 3000); 
                 }
                 
                 setShowGamesColumn(hasMultipleGames);
