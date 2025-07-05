@@ -156,17 +156,17 @@ function LeaderboardStizoCup() {
     const [localPage, setLocalPage] = useState(0); 
     const [totalApiPages, setTotalApiPages] = useState(1);
     const [searchQuery, setSearchQuery] = useState(""); 
-    const [showSearch, setShowSearch] = useState(false); 
+    const [showSearch, setShowSearch] = useState(true); 
 
     const [showGamesColumn, setShowGamesColumn] = useState(false);
     const [selectedTeam, setSelectedTeam] = useState(null);
     const [teamDetails, setTeamDetails] = useState({});
     const [previousPositions, setPreviousPositions] = useState({});
     const [lastChangeTime, setLastChangeTime] = useState(Date.now());
-    const [showPositionIndicators, setShowPositionIndicators] = useState(false);
+    const [showPositionIndicators, setShowPositionIndicators] = useState(true);
     const [hasRefreshedOnce, setHasRefreshedOnce] = useState(false);
-    const [animationEnabled, setAnimationEnabled] = useState(false);
-    const [cascadeFadeEnabled, setCascadeFadeEnabled] = useState(false);
+    const [animationEnabled, setAnimationEnabled] = useState(true);
+    const [cascadeFadeEnabled, setCascadeFadeEnabled] = useState(true);
 
     useEffect(() => {
         const handleKeyPress = (event) => {
@@ -309,11 +309,7 @@ function LeaderboardStizoCup() {
                     setLastChangeTime(now);
                     localStorage.setItem(lastChangeTimeKey, now.toString());
                     
-                    setAnimationEnabled(true);
-
-                    setTimeout(() => {
-                        setAnimationEnabled(false);
-                    }, 3000); 
+                    // L'animation reste toujours activée, pas besoin de la réactiver ou désactiver
                 }
                 
                 setShowGamesColumn(hasMultipleGames);
