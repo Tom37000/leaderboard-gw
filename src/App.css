@@ -483,8 +483,8 @@ html, body {
 .summer2r_cup .leaderboard_container {
   width: 1920px;
    height: 1080px;
-  /* background: #91e6fd;  couleur de fond */
-  background-image: url("Affiche2r_classement.png"); /* Image de fond */
+  background: #0831d8;  
+  background-image: url(""); /* Image de fond */
 }
 .summer2r_cup .row_container {
   display: flex;

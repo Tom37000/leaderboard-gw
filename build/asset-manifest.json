@@ -1,10 +1,9 @@
 {
   "files": {
-    "main.css": "/leaderboard/build/static/css/main.2a1137d4.css",
-    "main.js": "/leaderboard/build/static/js/main.cd5b8214.js",
+    "main.css": "/leaderboard/build/static/css/main.e65fd2ed.css",
+    "main.js": "/leaderboard/build/static/js/main.c776b85c.js",
     "static/js/453.98276a77.chunk.js": "/leaderboard/build/static/js/453.98276a77.chunk.js",
     "static/media/reddysh_royale_background.png": "/leaderboard/build/static/media/reddysh_royale_background.84434ba45ecdd7c68360.png",
-    "static/media/Affiche2r_classement.png": "/leaderboard/build/static/media/Affiche2r_classement.ce94076cb17e88296ffa.png",
     "static/media/IMPACT.TTF": "/leaderboard/build/static/media/IMPACT.393c8a0b905e3208112c.TTF",
     "static/media/leaderboard_background.png": "/leaderboard/build/static/media/leaderboard_background.6d0bcb66fe9829c326ac.png",
     "static/media/OmnesSemiBold.ttf": "/leaderboard/build/static/media/OmnesSemiBold.d9e74f703b27c9c45d13.ttf",
@@ -13,12 +12,12 @@
     "static/media/Eurostile.otf": "/leaderboard/build/static/media/Eurostile.5af602eec7a5fddc3fd4.otf",
     "static/media/good_times.OTF": "/leaderboard/build/static/media/good_times.a86d4f7f5cdb8cf2e409.OTF",
     "index.html": "/leaderboard/build/index.html",
-    "main.2a1137d4.css.map": "/leaderboard/build/static/css/main.2a1137d4.css.map",
-    "main.cd5b8214.js.map": "/leaderboard/build/static/js/main.cd5b8214.js.map",
+    "main.e65fd2ed.css.map": "/leaderboard/build/static/css/main.e65fd2ed.css.map",
+    "main.c776b85c.js.map": "/leaderboard/build/static/js/main.c776b85c.js.map",
     "453.98276a77.chunk.js.map": "/leaderboard/build/static/js/453.98276a77.chunk.js.map"
   },
   "entrypoints": [
-    "/leaderboard/static/css/main.2a1137d4.css",
-    "/leaderboard/static/js/main.cd5b8214.js"
+    "/leaderboard/static/css/main.e65fd2ed.css",
+    "/leaderboard/static/js/main.c776b85c.js"
   ]
 }

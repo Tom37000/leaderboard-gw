@@ -19,7 +19,7 @@ function App() {
           <Route path="/solary_leaderboard" element={<LeaderboardStizoCup />} />
           <Route path="/twitch_polls" element={<TwitchPolls />} />
           <Route path="/carry_ton_noob_leaderboard" element={<LeaderboardTCS />} />
-          <Route path="/2r_leaderboard" element={<Leaderboard2R />} />
+          <Route path="/solary1_leaderboard" element={<Leaderboard2R />} />
         </Routes >
       </Router>
     );
