@@ -166,7 +166,7 @@ function Leaderboard2R() {
     const [showPositionIndicators, setShowPositionIndicators] = useState(false);
     const [hasRefreshedOnce, setHasRefreshedOnce] = useState(false);
     const [animationEnabled, setAnimationEnabled] = useState(false);
-    const [cascadeFadeEnabled, setCascadeFadeEnabled] = useState(false);
+    const [cascadeFadeEnabled, setCascadeFadeEnabled] = useState(true);
 
     useEffect(() => {
         const handleKeyPress = (event) => {
@@ -296,12 +296,9 @@ function Leaderboard2R() {
                 localStorage.setItem(storageKey, JSON.stringify(currentPositions));
                 localStorage.setItem(gamesStorageKey, JSON.stringify(currentGames));
                 
-                // Ne stocker les indicateurs que s'il y a de vrais changements
                 if (changedTeams.size > 0) {
                     localStorage.setItem(indicatorsStorageKey, JSON.stringify(newIndicators));
                 }
-                
-                // Afficher les indicateurs s'il y a des changements réels ou des indicateurs stockés
                 const shouldShowIndicators = Object.keys(newIndicators).length > 0;
                 setShowPositionIndicators(shouldShowIndicators);
                 setHasRefreshedOnce(true);

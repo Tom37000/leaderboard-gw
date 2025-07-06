@@ -156,17 +156,17 @@ function LeaderboardStizoCup() {
     const [localPage, setLocalPage] = useState(0); 
     const [totalApiPages, setTotalApiPages] = useState(1);
     const [searchQuery, setSearchQuery] = useState(""); 
-    const [showSearch, setShowSearch] = useState(true); 
+    const [showSearch, setShowSearch] = useState(false); 
 
     const [showGamesColumn, setShowGamesColumn] = useState(false);
     const [selectedTeam, setSelectedTeam] = useState(null);
     const [teamDetails, setTeamDetails] = useState({});
     const [previousPositions, setPreviousPositions] = useState({});
     const [lastChangeTime, setLastChangeTime] = useState(Date.now());
-    const [showPositionIndicators, setShowPositionIndicators] = useState(true);
+    const [showPositionIndicators, setShowPositionIndicators] = useState(false);
     const [hasRefreshedOnce, setHasRefreshedOnce] = useState(false);
-    const [animationEnabled, setAnimationEnabled] = useState(true);
-    const [cascadeFadeEnabled, setCascadeFadeEnabled] = useState(true);
+    const [animationEnabled, setAnimationEnabled] = useState(false);
+    const [cascadeFadeEnabled, setCascadeFadeEnabled] = useState(false);
 
     useEffect(() => {
         const handleKeyPress = (event) => {
@@ -269,7 +269,6 @@ function LeaderboardStizoCup() {
                             changedTeams.add(team.teamname);
                         }
                     } else if (!shouldClearOldIndicators && storedIndicators[team.teamname] !== undefined) {
-                        // Récupérer les indicateurs stockés mais ne pas les considérer comme de nouveaux changements
                         positionChange = storedIndicators[team.teamname];
                         if (positionChange !== 0) {
                             newIndicators[team.teamname] = positionChange;
@@ -293,23 +292,24 @@ function LeaderboardStizoCup() {
                 });
                 localStorage.setItem(storageKey, JSON.stringify(currentPositions));
                 localStorage.setItem(gamesStorageKey, JSON.stringify(currentGames));
+                localStorage.setItem(indicatorsStorageKey, JSON.stringify(newIndicators));
                 
-                // Ne stocker les indicateurs que s'il y a de vrais changements
-                if (changedTeams.size > 0) {
-                    localStorage.setItem(indicatorsStorageKey, JSON.stringify(newIndicators));
-                }
-                
-                // Afficher les indicateurs s'il y a des changements réels ou des indicateurs stockés
-                const shouldShowIndicators = Object.keys(newIndicators).length > 0;
+                const shouldShowIndicators = hasChanges || Object.keys(newIndicators).length > 0;
                 setShowPositionIndicators(shouldShowIndicators);
                 setHasRefreshedOnce(true);
                 
-                if (hasChanges && changedTeams.size > 0) {
+                if (hasChanges) {
                     const now = Date.now();
                     setLastChangeTime(now);
                     localStorage.setItem(lastChangeTimeKey, now.toString());
                     
-                    // L'animation reste toujours activée, pas besoin de la réactiver ou désactiver
+                    if (changedTeams.size > 0) {
+                        setAnimationEnabled(true);
+
+                        setTimeout(() => {
+                            setAnimationEnabled(false);
+                        }, 3000); 
+                    }
                 }
                 
                 setShowGamesColumn(hasMultipleGames);
