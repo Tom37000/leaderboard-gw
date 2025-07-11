@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation } from 'react-router-dom';
 import './App.css';
 
-function Row({ rank, teamname, points, elims, avg_place, wins, games, order, showGamesColumn, onClick, positionChange, showPositionIndicators, animationEnabled, hasPositionChanged, cascadeFadeEnabled, cascadeIndex }) {
+const Row = React.memo(function Row({ rank, teamname, points, elims, avg_place, wins, games, order, showGamesColumn, onClick, positionChange, showPositionIndicators, animationEnabled, hasPositionChanged, cascadeFadeEnabled, cascadeIndex }) {
     const renderPositionChange = () => {
         if (!showPositionIndicators) {
             return null;
@@ -90,7 +90,7 @@ function Row({ rank, teamname, points, elims, avg_place, wins, games, order, sho
     };
 
     const getAnimationStyle = () => {
-        if (!animationEnabled || positionChange === 0) return {};
+        if (!animationEnabled || !hasPositionChanged || positionChange === 0) return {};
         
         const rowHeight = 60;
         const realDistance = Math.abs(positionChange) * rowHeight;
@@ -120,9 +120,9 @@ function Row({ rank, teamname, points, elims, avg_place, wins, games, order, sho
     return (
         <div className={getRowClasses()} style={{ 
             '--animation-order': order,
-            opacity: cascadeFadeEnabled ? 0 : (animationEnabled && hasPositionChanged) ? 0 : 1,
-            animation: cascadeFadeEnabled ? 'fadeIn 0.8s forwards' : (animationEnabled && hasPositionChanged) ? 'fadeIn 0.5s forwards' : 'none',
-            animationDelay: cascadeFadeEnabled ? `${cascadeIndex * 0.1}s` : (animationEnabled && hasPositionChanged) ? `calc(var(--animation-order) * 0.1s)` : '0s',
+            opacity: cascadeFadeEnabled ? 0 : 1,
+            animation: cascadeFadeEnabled ? 'fadeIn 0.8s forwards' : 'none',
+            animationDelay: cascadeFadeEnabled ? `${cascadeIndex * 0.1}s` : '0s',
             ...getAnimationStyle()
         }}>
             <div className='rank_container' style={{
@@ -146,7 +146,24 @@ function Row({ rank, teamname, points, elims, avg_place, wins, games, order, sho
             {showGamesColumn && <div className='info_box'>{games}</div>}
         </div>
     );
-}
+}, (prevProps, nextProps) => {
+    // Ne re-rendre que si les props importantes ont changé
+    return (
+        prevProps.rank === nextProps.rank &&
+        prevProps.teamname === nextProps.teamname &&
+        prevProps.points === nextProps.points &&
+        prevProps.elims === nextProps.elims &&
+        prevProps.avg_place === nextProps.avg_place &&
+        prevProps.wins === nextProps.wins &&
+        prevProps.games === nextProps.games &&
+        prevProps.showGamesColumn === nextProps.showGamesColumn &&
+        prevProps.positionChange === nextProps.positionChange &&
+        prevProps.showPositionIndicators === nextProps.showPositionIndicators &&
+        prevProps.animationEnabled === nextProps.animationEnabled &&
+        prevProps.hasPositionChanged === nextProps.hasPositionChanged &&
+        prevProps.cascadeFadeEnabled === nextProps.cascadeFadeEnabled
+    );
+});
 
 function LeaderboardSolary() {
     const leaderboard_id = new URLSearchParams(useLocation().search).get('id');
@@ -167,6 +184,7 @@ function LeaderboardSolary() {
     const [hasRefreshedOnce, setHasRefreshedOnce] = useState(false);
     const [animationEnabled, setAnimationEnabled] = useState(false);
     const [cascadeFadeEnabled, setCascadeFadeEnabled] = useState(true);
+    const [previousLeaderboard, setPreviousLeaderboard] = useState(null);
 
     useEffect(() => {
         const handleKeyPress = (event) => {
@@ -279,13 +297,39 @@ function LeaderboardSolary() {
                     }
                 });
                 
-                const updatedLeaderboardData = allLeaderboardData.map(team => {
-                    return {
-                        ...team,
-                        positionChange: newIndicators[team.teamname] || 0,
-                        hasPositionChanged: changedTeams.has(team.teamname)
-                    };
-                });
+                // Optimisation: ne mettre à jour que les équipes qui ont changé
+                let updatedLeaderboardData;
+                if (previousLeaderboard && changedTeams.size === 0) {
+                    // Aucun changement de position, on garde le leaderboard existant
+                    // mais on met à jour les données qui peuvent avoir changé (points, elims, etc.)
+                    updatedLeaderboardData = allLeaderboardData.map(team => {
+                        const existingTeam = previousLeaderboard.find(prev => prev.teamname === team.teamname);
+                        if (existingTeam && 
+                            existingTeam.points === team.points && 
+                            existingTeam.elims === team.elims && 
+                            existingTeam.wins === team.wins && 
+                            existingTeam.games === team.games) {
+                            // Aucune donnée n'a changé, on garde l'objet existant
+                            return existingTeam;
+                        }
+                        return {
+                            ...team,
+                            positionChange: newIndicators[team.teamname] || 0,
+                            hasPositionChanged: false,
+                            teamId: team.teamname
+                        };
+                    });
+                } else {
+                    // Il y a des changements, on met à jour normalement
+                    updatedLeaderboardData = allLeaderboardData.map(team => {
+                        return {
+                            ...team,
+                            positionChange: newIndicators[team.teamname] || 0,
+                            hasPositionChanged: changedTeams.has(team.teamname),
+                            teamId: team.teamname // Identifiant stable pour React
+                        };
+                    });
+                }
             
                 const currentPositions = {};
                 const currentGames = {};
@@ -321,6 +365,9 @@ function LeaderboardSolary() {
                 setShowGamesColumn(hasMultipleGames);
                 setLeaderboard(updatedLeaderboardData);
                 setTeamDetails(allDetails);
+                
+                // Stocker le leaderboard actuel pour la prochaine comparaison
+                setPreviousLeaderboard(updatedLeaderboardData);
             } catch (error) {
                 console.error('Error loading leaderboard data:', error);
             }
@@ -492,7 +539,7 @@ function LeaderboardSolary() {
                         
                         return (
                             <Row
-                                key={`${apiPage}-${localPage}-${index}`}
+                                key={data.teamId || data.teamname}
                                 rank={data.place}
                                 teamname={data.teamname}
                                 points={data.points}
