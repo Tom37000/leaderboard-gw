@@ -1,8 +1,9 @@
 import './App.css';
 import React, {useState, useEffect} from "react"
 import { useLocation } from 'react-router-dom';
+import './App.css';
 
-function Row({rank, teamname, points, elims, avg_place, wins, positionChange, showPositionIndicators, animationEnabled, hasPositionChanged, order}) {
+const Row = React.memo(function Row({rank, teamname, points, elims, avg_place, wins, games, order, showGamesColumn, onClick, positionChange, showPositionIndicators, animationEnabled, hasPositionChanged, cascadeFadeEnabled, cascadeIndex}) {
     const renderPositionChange = () => {
         if (!showPositionIndicators) {
             return null;
@@ -66,7 +67,7 @@ function Row({rank, teamname, points, elims, avg_place, wins, positionChange, sh
         };
 
         if (positionChange === 0) {
-            return <span className="position_change neutral" style={getIndicatorStyle('neutral', '=')}>=</span>;
+            return null;
         }
         if (positionChange > 0) {
             return <span className="position_change positive" style={getIndicatorStyle('positive', `+${positionChange}`)}>+{positionChange}</span>;
@@ -100,155 +101,542 @@ function Row({rank, teamname, points, elims, avg_place, wins, positionChange, sh
     return (
         <div className='row_container' style={{ 
             '--animation-order': order,
-            opacity: (animationEnabled && hasPositionChanged) ? 0 : 1,
-            animation: (animationEnabled && hasPositionChanged) ? 'fadeIn 0.5s forwards' : 'none',
-            animationDelay: (animationEnabled && hasPositionChanged) ? `calc(var(--animation-order) * 0.1s)` : '0s',
+            opacity: cascadeFadeEnabled ? 0 : 1,
+            animation: cascadeFadeEnabled ? 'fadeIn 0.8s forwards' : 'none',
+            animationDelay: cascadeFadeEnabled ? `${cascadeIndex * 0.1}s` : '0s',
             ...getAnimationStyle()
         }}>
-            <div className='rank_container'>
+            <div className='rank_container' style={{
+                fontSize: rank >= 1000 ? '24px' : rank >= 100 ? '24px' : '26px',
+                paddingLeft: rank >= 1000 ? '16px' : rank >= 100 ? '12px' : rank >= 10 ? '4px' : '0px'
+            }}>
                 {rank}
                 {renderPositionChange()}
             </div>
-            <div className='name_container'>{teamname}</div>
+            <div className='name_container' style={{ 
+                cursor: 'pointer',
+                fontSize: teamname.length > 25 ? '16px' : teamname.length > 20 ? '18px' : teamname.length > 15 ? '20px' : teamname.length > 10 ? '22px' : '24px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+            }} onClick={onClick}>{teamname}</div>
             <div className='info_box'>{avg_place.toFixed(2)}</div>  
             <div className='info_box'>{elims}</div>  
             <div className='info_box'>{wins}</div>  
-            <div className='info_box'>{points}</div>  
+            <div className='info_box'>{points}</div>
+            {showGamesColumn && <div className='info_box'>{games}</div>}
         </div>
-    )
-}
+    );
+}, (prevProps, nextProps) => {
+    // Ne re-rendre que si les props importantes ont changé
+    return (
+        prevProps.rank === nextProps.rank &&
+        prevProps.teamname === nextProps.teamname &&
+        prevProps.points === nextProps.points &&
+        prevProps.elims === nextProps.elims &&
+        prevProps.avg_place === nextProps.avg_place &&
+        prevProps.wins === nextProps.wins &&
+        prevProps.games === nextProps.games &&
+        prevProps.showGamesColumn === nextProps.showGamesColumn &&
+        prevProps.positionChange === nextProps.positionChange &&
+        prevProps.showPositionIndicators === nextProps.showPositionIndicators &&
+        prevProps.animationEnabled === nextProps.animationEnabled &&
+        prevProps.hasPositionChanged === nextProps.hasPositionChanged &&
+        prevProps.cascadeFadeEnabled === nextProps.cascadeFadeEnabled
+    );
+});
 
 function LeaderboardTCS() {
 
     const leaderboard_id = new URLSearchParams(useLocation().search).get('id');
 
-    const [leaderboard, setLeaderboard] = useState(null)
-    const [page, setPage] = useState([0, 8])
-    const [previousPositions, setPreviousPositions] = useState({})
-    const [showPositionIndicators, setShowPositionIndicators] = useState(false)
-    const [animationEnabled, setAnimationEnabled] = useState(false)
+    const [leaderboard, setLeaderboard] = useState(null);
+    const [apiPage, setApiPage] = useState(0); 
+    const [localPage, setLocalPage] = useState(0); 
+    const [totalApiPages, setTotalApiPages] = useState(1);
+    const [searchQuery, setSearchQuery] = useState(""); 
+    const [showSearch, setShowSearch] = useState(true); 
+
+    const [showGamesColumn, setShowGamesColumn] = useState(false);
+    const [selectedTeam, setSelectedTeam] = useState(null);
+    const [teamDetails, setTeamDetails] = useState({});
+    const [previousPositions, setPreviousPositions] = useState({});
+    const [lastChangeTime, setLastChangeTime] = useState(Date.now());
+    const [showPositionIndicators, setShowPositionIndicators] = useState(false);
+    const [hasRefreshedOnce, setHasRefreshedOnce] = useState(false);
+    const [animationEnabled, setAnimationEnabled] = useState(false);
+    const [cascadeFadeEnabled, setCascadeFadeEnabled] = useState(true);
+    const [previousLeaderboard, setPreviousLeaderboard] = useState(null);
 
     const loadLeaderboard = async () => {
         try {
-            const response = await fetch("https://api.wls.gg/v5/leaderboards/"+leaderboard_id);
-            const data = await response.json();
+            const firstResponse = await fetch(`https://api.wls.gg/v5/leaderboards/${leaderboard_id}?page=0`);
+            const firstData = await firstResponse.json();
             
-            let leaderboard_list = []
-            for (let team in data.teams){
-                leaderboard_list.push({
-                    teamname: Object.values(data.teams[team].members).map(member => member.name).sort().join(' - '),
-                    elims: Object.values(data.teams[team].sessions).map(session => session.kills).reduce((acc, curr) => acc + curr, 0),
-                    avg_place: Object.values(data.teams[team].sessions).map(session => session.place).reduce((acc, curr, _, arr) => acc + curr / arr.length, 0),
-                    wins: Object.values(data.teams[team].sessions).map(session => session.place).reduce((acc, curr) => acc + (curr === 1 ? 1 : 0), 0),
-                    place: data.teams[team].place,
-                    points: data.teams[team].points
-                })
+            let allLeaderboardData = [];
+            let allDetails = {};
+            let hasMultipleGames = false;
+            
+            const totalPages = firstData.total_pages || 1;
+            setTotalApiPages(totalPages);
+            
+            const promises = [];
+            for (let page = 0; page < totalPages; page++) {
+                promises.push(
+                    fetch(`https://api.wls.gg/v5/leaderboards/${leaderboard_id}?page=${page}`)
+                        .then(response => response.json())
+                );
             }
             
-            // Get previous positions from localStorage
-            const storedPositions = JSON.parse(localStorage.getItem(`leaderboard_positions_${leaderboard_id}`) || '{}');
-            const storedIndicators = JSON.parse(localStorage.getItem(`leaderboard_indicators_${leaderboard_id}`) || 'false');
+            const allPagesData = await Promise.all(promises);
             
-            // Calculate position changes
-            const currentPositions = {};
-            let hasAnyChange = false;
-            
-            leaderboard_list.forEach(team => {
-                const teamKey = team.teamname;
-                currentPositions[teamKey] = team.place;
-                
-                if (storedPositions[teamKey] !== undefined) {
-                    const positionChange = storedPositions[teamKey] - team.place;
-                    team.positionChange = positionChange;
-                    team.hasPositionChanged = positionChange !== 0;
+            allPagesData.forEach(data => {
+                for (let team in data.teams) {
+                    const sessionKeys = Object.keys(data.teams[team].sessions).sort((a, b) => parseInt(a) - parseInt(b));
+                    const sessions = sessionKeys.map(key => data.teams[team].sessions[key]);
+                    const gamesCount = sessions.length;
+                    const members = Object.values(data.teams[team].members);
+                    members.sort((a, b) => a.id.localeCompare(b.id));
+                    const teamname = members.map(member => member.name).join(' - ');
                     
-                    if (positionChange !== 0) {
-                        hasAnyChange = true;
+                    if (gamesCount > 1) {
+                        hasMultipleGames = true;
                     }
-                } else {
-                    team.positionChange = 0;
-                    team.hasPositionChanged = false;
+
+                    allDetails[teamname] = {
+                        members: members,
+                        sessions: sessions,
+                        teamData: data.teams[team]
+                    };
+                    
+                    allLeaderboardData.push({
+                        teamname: teamname,
+                        elims: sessions.map(session => session.kills).reduce((acc, curr) => acc + curr, 0),
+                        avg_place: sessions.reduce((acc, session) => acc + session.place, 0) / sessions.length,
+                        wins: sessions.map(session => session.place).reduce((acc, curr) => acc + (curr === 1 ? 1 : 0), 0),
+                        games: gamesCount,
+                        place: data.teams[team].place,
+                        points: data.teams[team].points
+                    });
+                }
+            });
+            allLeaderboardData.sort((a, b) => {
+                if (a.place !== b.place) {
+                    return a.place - b.place;
+                }
+                return b.points - a.points;
+            });
+            
+            const storageKey = `leaderboard_positions_${leaderboard_id}`;
+            const previousPositions = JSON.parse(localStorage.getItem(storageKey) || '{}');
+            const gamesStorageKey = `leaderboard_games_${leaderboard_id}`;
+            const previousGames = JSON.parse(localStorage.getItem(gamesStorageKey) || '{}');
+            const indicatorsStorageKey = `position_indicators_${leaderboard_id}`;
+            const storedIndicators = JSON.parse(localStorage.getItem(indicatorsStorageKey) || '{}');
+            const lastChangeTimeKey = `last_change_time_${leaderboard_id}`;
+            const storedLastChangeTime = localStorage.getItem(lastChangeTimeKey);
+            
+            let hasChanges = false;
+            const newIndicators = {};
+            const changedTeams = new Set();
+            
+            const now = Date.now();
+            const shouldClearOldIndicators = storedLastChangeTime && (now - parseInt(storedLastChangeTime)) > 120000;
+            
+            if (shouldClearOldIndicators) {
+                localStorage.removeItem(indicatorsStorageKey);
+                localStorage.removeItem(lastChangeTimeKey);
+            }
+            
+            allLeaderboardData.forEach(team => {
+                const previousPosition = previousPositions[team.teamname];
+                let positionChange = 0;
+                
+                if (previousPosition !== undefined && previousPosition !== team.place) {
+                    positionChange = previousPosition - team.place;
+                    if (positionChange !== 0) {
+                        hasChanges = true;
+                        newIndicators[team.teamname] = positionChange;
+                        changedTeams.add(team.teamname);
+                    }
+                } else if (!shouldClearOldIndicators && storedIndicators[team.teamname] !== undefined) {
+                    positionChange = storedIndicators[team.teamname];
+                    if (positionChange !== 0) {
+                        newIndicators[team.teamname] = positionChange;
+                    }
                 }
             });
             
-            // Update state
-            setLeaderboard(leaderboard_list);
-            setPreviousPositions(currentPositions);
+            // Optimisation: ne mettre à jour que les équipes qui ont changé
+            let updatedLeaderboardData;
+            if (previousLeaderboard && changedTeams.size === 0) {
+                // Aucun changement de position, on garde le leaderboard existant
+                // mais on met à jour les données qui peuvent avoir changé (points, elims, etc.)
+                updatedLeaderboardData = allLeaderboardData.map(team => {
+                    const existingTeam = previousLeaderboard.find(prev => prev.teamname === team.teamname);
+                    if (existingTeam && 
+                        existingTeam.points === team.points && 
+                        existingTeam.elims === team.elims && 
+                        existingTeam.wins === team.wins && 
+                        existingTeam.games === team.games) {
+                        // Aucune donnée n'a changé, on garde l'objet existant
+                        return existingTeam;
+                    }
+                    return {
+                        ...team,
+                        positionChange: newIndicators[team.teamname] || 0,
+                        hasPositionChanged: false,
+                        teamId: team.teamname
+                    };
+                });
+            } else {
+                // Il y a des changements, on met à jour normalement
+                updatedLeaderboardData = allLeaderboardData.map(team => {
+                    return {
+                        ...team,
+                        positionChange: newIndicators[team.teamname] || 0,
+                        hasPositionChanged: changedTeams.has(team.teamname),
+                        teamId: team.teamname // Identifiant stable pour React
+                    };
+                });
+            }
+        
+            const currentPositions = {};
+            const currentGames = {};
+            allLeaderboardData.forEach(team => {
+                currentPositions[team.teamname] = team.place;
+                currentGames[team.teamname] = team.games;
+            });
+            localStorage.setItem(storageKey, JSON.stringify(currentPositions));
+            localStorage.setItem(gamesStorageKey, JSON.stringify(currentGames));
             
-            if (hasAnyChange) {
-                setShowPositionIndicators(true);
-                setAnimationEnabled(true);
-                
-                // Hide indicators and disable animation after 3 seconds
-                setTimeout(() => {
-                    setAnimationEnabled(false);
-                }, 3000);
-            } else if (storedIndicators) {
-                setShowPositionIndicators(true);
+            // Ne stocker les indicateurs que s'il y a de vrais changements
+            if (changedTeams.size > 0) {
+                localStorage.setItem(indicatorsStorageKey, JSON.stringify(newIndicators));
             }
             
-            // Save current positions and indicators to localStorage
-            localStorage.setItem(`leaderboard_positions_${leaderboard_id}`, JSON.stringify(currentPositions));
-            localStorage.setItem(`leaderboard_indicators_${leaderboard_id}`, JSON.stringify(showPositionIndicators || hasAnyChange));
+            // Afficher les indicateurs s'il y a des changements réels ou des indicateurs stockés
+            const shouldShowIndicators = Object.keys(newIndicators).length > 0;
+            setShowPositionIndicators(shouldShowIndicators);
+            setHasRefreshedOnce(true);
             
+            if (hasChanges && changedTeams.size > 0) {
+                const now = Date.now();
+                setLastChangeTime(now);
+                localStorage.setItem(lastChangeTimeKey, now.toString());
+                
+                setAnimationEnabled(true);
+                
+                setTimeout(() => {
+                    setAnimationEnabled(false);
+                }, 3000); 
+            }
+            
+            setShowGamesColumn(hasMultipleGames);
+            setLeaderboard(updatedLeaderboardData);
+            setTeamDetails(allDetails);
+            
+            // Stocker le leaderboard actuel pour la prochaine comparaison
+            setPreviousLeaderboard(updatedLeaderboardData);
         } catch (error) {
-            console.error('Error loading leaderboard:', error);
+            console.error('Error loading leaderboard data:', error);
         }
     };
 
     useEffect(() => {
+        const handleKeyPress = (event) => {
+            if (event.key === 'F8') {
+                setCascadeFadeEnabled(prev => !prev);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyPress);
+        return () => window.removeEventListener('keydown', handleKeyPress);
+    }, []);
+
+    useEffect(() => {
         loadLeaderboard();
+        
         const interval = setInterval(loadLeaderboard, 30000);
+        
         return () => clearInterval(interval);
     }, [leaderboard_id]);
 
-    function nextPage(){
-        setPage(page.map(num => num + 8))
+    useEffect(() => {
+        function handleKeyDown(event) {
+            if (event.key === 'F1') { 
+                event.preventDefault();
+                setShowSearch(prev => !prev); 
+            }
+        }
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, []);
+
+    useEffect(() => {
+        setLocalPage(0);
+    }, [searchQuery]);
+
+    const handleTeamClick = (teamname) => {
+        setSelectedTeam(teamname);
+    };
+
+    const closeModal = () => {
+        setSelectedTeam(null);
+    };
+
+    function nextPageFromPoints() {
+        if (!showGamesColumn) {
+            const filteredLeaderboard = leaderboard
+                ? leaderboard.filter(team => {
+                    if (team.teamname.toLowerCase().includes(searchQuery.toLowerCase())) {
+                        return true;
+                    }
+                    if (!isNaN(searchQuery) && searchQuery.trim() !== '') {
+                        const searchPosition = parseInt(searchQuery.trim());
+                        if (team.place === searchPosition) {
+                            return true;
+                        }
+                    }
+                    if (teamDetails[team.teamname] && teamDetails[team.teamname].members) {
+                        return teamDetails[team.teamname].members.some(member => 
+                            member.ingame_name && member.ingame_name.toLowerCase().includes(searchQuery.toLowerCase())
+                        );
+                    }
+                    return false;
+                })
+                : [];
+            const maxPages = Math.ceil(filteredLeaderboard.length / 10) - 1;
+            
+            if (localPage < maxPages) {
+                setLocalPage(localPage + 1);
+            }
+        }
     }
 
-    function previousPage(){
-        setPage(page.map(num => num - 8 ))
+    function nextPageFromGames() {
+        if (showGamesColumn) {
+            const filteredLeaderboard = leaderboard
+                ? leaderboard.filter(team => {
+                    if (team.teamname.toLowerCase().includes(searchQuery.toLowerCase())) {
+                        return true;
+                    }
+                    if (!isNaN(searchQuery) && searchQuery.trim() !== '') {
+                        const searchPosition = parseInt(searchQuery.trim());
+                        if (team.place === searchPosition) {
+                            return true;
+                        }
+                    }
+                    if (teamDetails[team.teamname] && teamDetails[team.teamname].members) {
+                        return teamDetails[team.teamname].members.some(member => 
+                            member.ingame_name && member.ingame_name.toLowerCase().includes(searchQuery.toLowerCase())
+                        );
+                    }
+                    return false;
+                })
+                : [];
+            const maxPages = Math.ceil(filteredLeaderboard.length / 10) - 1;
+            
+            if (localPage < maxPages) {
+                setLocalPage(localPage + 1);
+            }
+        }
     }
-    
+
+    function previousPage() {
+        if (localPage > 0) {
+            setLocalPage(localPage - 1);
+        }
+    }
+    const filteredLeaderboard = leaderboard
+        ? leaderboard.filter(team => {
+            if (team.teamname.toLowerCase().includes(searchQuery.toLowerCase())) {
+                return true;
+            }
+            if (!isNaN(searchQuery) && searchQuery.trim() !== '') {
+                const searchPosition = parseInt(searchQuery.trim());
+                if (team.place === searchPosition) {
+                    return true;
+                }
+            }
+            if (teamDetails[team.teamname] && teamDetails[team.teamname].members) {
+                return teamDetails[team.teamname].members.some(member => 
+                    member.ingame_name && member.ingame_name.toLowerCase().includes(searchQuery.toLowerCase())
+                );
+            }
+            return false;
+        })
+        : [];
+    const startIndex = localPage * 10;
+    const endIndex = startIndex + 10;
+    const displayedLeaderboard = filteredLeaderboard.slice(startIndex, endIndex);
+
     return (
-        <div className='tcs'> 
+        <div className='tcs'>
+
+            {showSearch && (
+                <div className='search_container'>
+                    <input
+                        type="text"
+                        placeholder="Rechercher un joueur"
+                        className="search_input"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </div>
+            )}
+            
             <div className='leaderboard_container'>
                 <div className='leaderboard_table'>
                     <div className='header_container'>
-                        <div className='rank_header' onClick={previousPage} >RANK</div>
+                        <div className='rank_header' onClick={previousPage}>RANK</div>
                         <div className='name_header'>TEAM</div>
                         <div style={{fontSize: '13px'}} className='info_header'>AVG PLACE</div>
                         <div className='info_header'>ELIMS</div>
                         <div className='info_header'>WINS</div>
-                        <div onClick={nextPage} className='info_header'>POINTS</div>
+                        <div className='info_header' onClick={nextPageFromPoints}>POINTS</div>
+                        {showGamesColumn && <div onClick={nextPageFromGames} className='info_header'>GAMES</div>}
                     </div>
-                    {leaderboard ? leaderboard.slice(page[0],page[1]).map(data => {
-                        const order = Math.abs(data.positionChange || 0) >= 500 ? 1 :
-                                     Math.abs(data.positionChange || 0) >= 100 ? 2 :
-                                     Math.abs(data.positionChange || 0) >= 50 ? 3 :
-                                     Math.abs(data.positionChange || 0) >= 10 ? 4 :
-                                     Math.abs(data.positionChange || 0) > 0 ? 5 : 6;
+                    {displayedLeaderboard.map((data, index) => {
+                        const positionChange = Math.abs(data.positionChange || 0);
+                        let animationOrder;
                         
-                        return <Row 
-                            key={data.teamname}
-                            rank={data.place} 
-                            teamname={data.teamname} 
-                            points={data.points} 
-                            elims={data.elims} 
-                            wins={data.wins} 
-                            avg_place={data.avg_place}
-                            positionChange={data.positionChange || 0}
-                            showPositionIndicators={showPositionIndicators}
-                            animationEnabled={animationEnabled}
-                            hasPositionChanged={data.hasPositionChanged || false}
-                            order={order}
-                        />;
-                    }) : ''}
+                        if (positionChange >= 500) {
+                            animationOrder = 1; 
+                        } else if (positionChange >= 100) {
+                            animationOrder = 2;
+                        } else if (positionChange >= 50) {
+                            animationOrder = 3;
+                        } else if (positionChange >= 10) {
+                            animationOrder = 4;
+                        } else if (positionChange > 0) {
+                            animationOrder = 5;
+                        } else {
+                            animationOrder = index + 6; 
+                        }
+                        
+                        return (
+                            <Row
+                                key={data.teamId || data.teamname}
+                                rank={data.place}
+                                teamname={data.teamname}
+                                points={data.points}
+                                elims={data.elims}
+                                wins={data.wins}
+                                games={data.games}
+                                avg_place={data.avg_place}
+                                order={animationOrder}
+                                showGamesColumn={showGamesColumn}
+                                onClick={() => handleTeamClick(data.teamname)}
+                                positionChange={data.positionChange || 0}
+                                showPositionIndicators={showPositionIndicators}
+                                animationEnabled={animationEnabled}
+                                hasPositionChanged={data.hasPositionChanged || false}
+                                cascadeFadeEnabled={cascadeFadeEnabled}
+                                cascadeIndex={index}
+                            />
+                        );
+                    })}
                 </div>
-            </div>
-        </div>
 
-    )
+            </div>
+
+            {selectedTeam && teamDetails[selectedTeam] && (
+                <div className='modal_overlay' onClick={closeModal}>
+                    <div className='modal_content' onClick={(e) => e.stopPropagation()}>
+                        <div className='modal_header'>
+                            <h2>Stats détaillées - {selectedTeam}</h2>
+                            <button className='close_button' onClick={closeModal}>×</button>
+                        </div>
+                        <div className='modal_body'>
+                            <div className='team_summary'>
+                                <h3>Résumé de l'équipe :</h3>
+                                <div className='stats_grid'>
+                                    <div className='stat_item'>
+                                        <span className='stat_label'>Position:</span>
+                                        <span className='stat_value'>#{teamDetails[selectedTeam].teamData.place}</span>
+                                    </div>
+                                    <div className='stat_item'>
+                                        <span className='stat_label'>Points totaux:</span>
+                                        <span className='stat_value'>{teamDetails[selectedTeam].teamData.points}</span>
+                                    </div>
+                                    <div className='stat_item'>
+                                        <span className='stat_label'>Parties jouées :</span>
+                                        <span className='stat_value'>{teamDetails[selectedTeam].sessions.length}</span>
+                                    </div>
+                                    <div className='stat_item'>
+                                        <span className='stat_label'>Victoires:</span>
+                                        <span className='stat_value'>{teamDetails[selectedTeam].sessions.filter(s => s.place === 1).length}</span>
+                                    </div>
+                                    <div className='stat_item'>
+                                        <span className='stat_label'>Top 3:</span>
+                                        <span className='stat_value'>{teamDetails[selectedTeam].sessions.filter(s => s.place <= 3).length}</span>
+                                    </div>
+                                    <div className='stat_item'>
+                                        <span className='stat_label'>Élims totales:</span>
+                                        <span className='stat_value'>{teamDetails[selectedTeam].sessions.reduce((acc, s) => acc + s.kills, 0)}</span>
+                                    </div>
+                                    <div className='stat_item'>
+                                        <span className='stat_label'>Place moyenne:</span>
+                                        <span className='stat_value'>{(teamDetails[selectedTeam].sessions.reduce((acc, s) => acc + s.place, 0) / teamDetails[selectedTeam].sessions.length).toFixed(2)}</span>
+                                    </div>
+                                    <div className='stat_item'>
+                                        <span className='stat_label'>Élims/partie:</span>
+                                        <span className='stat_value'>{(teamDetails[selectedTeam].sessions.reduce((acc, s) => acc + s.kills, 0) / teamDetails[selectedTeam].sessions.length).toFixed(2)}</span>
+                                    </div>
+                                    <div className='stat_item'>
+                                        <span className='stat_label'>Meilleure place:</span>
+                                        <span className='stat_value'>{Math.min(...teamDetails[selectedTeam].sessions.map(s => s.place))}</span>
+                                    </div>
+                                    <div className='stat_item'>
+                                        <span className='stat_label'>Pire place:</span>
+                                        <span className='stat_value'>{Math.max(...teamDetails[selectedTeam].sessions.map(s => s.place))}</span>
+                                    </div>
+                                    <div className='stat_item'>
+                                        <span className='stat_label'>Max élims/partie:</span>
+                                        <span className='stat_value'>{Math.max(...teamDetails[selectedTeam].sessions.map(s => s.kills))}</span>
+                                    </div>
+
+                                </div>
+                            </div>
+                            
+                            <div className='members_section'>
+                                <h3>Membre(s) de l'équipe :</h3>
+                                <div className='members_grid'>
+                                    {teamDetails[selectedTeam].members.map((member, index) => (
+                                        <div key={index} className='member_card'>
+                                            <strong>{member.name}</strong>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            
+                            <div className='sessions_section'>
+                                <h3>Historique détaillé des games :</h3>
+                                <div className='sessions_table'>
+                                    <div className='session_header'>
+                                        <div>Game</div>
+                                        <div>Place</div>
+                                        <div>Éliminations</div>
+                                    </div>
+                                    {teamDetails[selectedTeam].sessions.map((session, index) => (
+                                        <div key={index} className='session_row'>
+                                            <div className='session_highlight'>{index + 1}</div>
+                                            <div className={`place_${session.place <= 3 ? 'top' : session.place <= 10 ? 'good' : 'normal'}`}>{session.place}</div>
+                                            <div className='session_highlight'>{session.kills}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
 }
 
 export default LeaderboardTCS
