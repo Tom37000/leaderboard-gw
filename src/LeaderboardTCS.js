@@ -159,6 +159,7 @@ function LeaderboardTCS() {
     const [searchQuery, setSearchQuery] = useState(""); 
     const [showSearch, setShowSearch] = useState(false); 
 
+
     const [showGamesColumn, setShowGamesColumn] = useState(false);
     const [selectedTeam, setSelectedTeam] = useState(null);
     const [teamDetails, setTeamDetails] = useState({});
@@ -399,6 +400,8 @@ function LeaderboardTCS() {
         setLocalPage(0);
     }, [searchQuery]);
 
+
+
     const handleTeamClick = (teamname) => {
         setSelectedTeam(teamname);
     };
@@ -406,6 +409,8 @@ function LeaderboardTCS() {
     const closeModal = () => {
         setSelectedTeam(null);
     };
+
+
 
     function nextPageFromPoints() {
         if (!showGamesColumn) {
@@ -511,7 +516,7 @@ function LeaderboardTCS() {
                     paddingTop: '50px',
                     marginBottom: '20px',
                     fontWeight: 'bold'
-                }}>Classement Centre de Formation | Demi-Finale Lobby 2</div>
+                }}>Classement Centre de Formation | Demi-Finale Lobby 3</div>
 
                 <div className='leaderboard_table'>
                     <div className='header_container'>
@@ -566,6 +571,8 @@ function LeaderboardTCS() {
                 </div>
 
             </div>
+
+
 
             {selectedTeam && teamDetails[selectedTeam] && (
                 <div className='modal_overlay' onClick={closeModal}>
