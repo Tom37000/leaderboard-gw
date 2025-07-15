@@ -187,13 +187,62 @@ function LeaderboardWolt() {
                 }
             })
             
-            const updatedLeaderboardData = leaderboard_list.map(team => {
-                return {
-                    ...team,
-                    positionChange: newIndicators[team.teamname] || 0,
-                    hasPositionChanged: changedTeams.has(team.teamname)
-                }
-            })
+            // Optimisation avancée: mise à jour sélective pour éviter les clignotements
+            let updatedLeaderboardData;
+            const previousLeaderboard = leaderboard;
+            
+            if (previousLeaderboard) {
+                // Toujours partir du leaderboard existant pour éviter les re-rendus complets
+                updatedLeaderboardData = leaderboard_list.map(team => {
+                    const existingTeam = previousLeaderboard.find(prev => prev.teamname === team.teamname);
+                    
+                    // Si l'équipe existe déjà et que seules les données ont changé (pas la position)
+                    if (existingTeam && existingTeam.place === team.place) {
+                        // Vérifier si les données ont réellement changé
+                        const dataChanged = existingTeam.points !== team.points || 
+                                          existingTeam.elims !== team.elims || 
+                                          existingTeam.wins !== team.wins;
+                        
+                        if (!dataChanged) {
+                            // Aucun changement, garder l'objet existant
+                            return {
+                                ...existingTeam,
+                                positionChange: newIndicators[team.teamname] || existingTeam.positionChange || 0,
+                                hasPositionChanged: changedTeams.has(team.teamname)
+                            };
+                        } else {
+                            // Seulement les données ont changé, pas la position
+                            return {
+                                ...existingTeam,
+                                points: team.points,
+                                elims: team.elims,
+                                wins: team.wins,
+                                avg_place: team.avg_place,
+                                positionChange: newIndicators[team.teamname] || 0,
+                                hasPositionChanged: false
+                            };
+                        }
+                    } else {
+                        // Nouvelle équipe ou changement de position
+                        return {
+                            ...team,
+                            positionChange: newIndicators[team.teamname] || 0,
+                            hasPositionChanged: changedTeams.has(team.teamname),
+                            teamId: team.teamname
+                        };
+                    }
+                });
+            } else {
+                // Premier chargement
+                updatedLeaderboardData = leaderboard_list.map(team => {
+                    return {
+                        ...team,
+                        positionChange: newIndicators[team.teamname] || 0,
+                        hasPositionChanged: changedTeams.has(team.teamname),
+                        teamId: team.teamname
+                    };
+                });
+            }
             
             // Sauvegarde des positions actuelles
             const currentPositions = {}
@@ -215,7 +264,7 @@ function LeaderboardWolt() {
                     
                     setTimeout(() => {
                         setAnimationEnabled(false)
-                    }, 3000)
+                    }, 2000) // 2 secondes d'animation pour plus de fluidité
                 }
             }
             
@@ -229,7 +278,7 @@ function LeaderboardWolt() {
     useEffect(() => {
         loadLeaderboard()
         
-        const interval = setInterval(loadLeaderboard, 30000)
+        const interval = setInterval(loadLeaderboard, 15000)
         
         return () => clearInterval(interval)
     }, [leaderboard_id])

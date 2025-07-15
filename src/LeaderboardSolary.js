@@ -297,36 +297,59 @@ function LeaderboardSolary() {
                     }
                 });
                 
-                // Optimisation: ne mettre à jour que les équipes qui ont changé
+                // Optimisation avancée: mise à jour sélective pour éviter les clignotements
                 let updatedLeaderboardData;
-                if (previousLeaderboard && changedTeams.size === 0) {
-                    // Aucun changement de position, on garde le leaderboard existant
-                    // mais on met à jour les données qui peuvent avoir changé (points, elims, etc.)
+                if (previousLeaderboard) {
+                    // Toujours partir du leaderboard existant pour éviter les re-rendus complets
                     updatedLeaderboardData = allLeaderboardData.map(team => {
                         const existingTeam = previousLeaderboard.find(prev => prev.teamname === team.teamname);
-                        if (existingTeam && 
-                            existingTeam.points === team.points && 
-                            existingTeam.elims === team.elims && 
-                            existingTeam.wins === team.wins && 
-                            existingTeam.games === team.games) {
-                            // Aucune donnée n'a changé, on garde l'objet existant
-                            return existingTeam;
+                        
+                        // Si l'équipe existe déjà et que seules les données ont changé (pas la position)
+                        if (existingTeam && existingTeam.place === team.place) {
+                            // Vérifier si les données ont réellement changé
+                            const dataChanged = existingTeam.points !== team.points || 
+                                              existingTeam.elims !== team.elims || 
+                                              existingTeam.wins !== team.wins || 
+                                              existingTeam.games !== team.games;
+                            
+                            if (!dataChanged) {
+                                // Aucun changement, garder l'objet existant
+                                return {
+                                    ...existingTeam,
+                                    positionChange: newIndicators[team.teamname] || existingTeam.positionChange || 0,
+                                    hasPositionChanged: changedTeams.has(team.teamname)
+                                };
+                            } else {
+                                // Seulement les données ont changé, pas la position
+                                return {
+                                    ...existingTeam,
+                                    points: team.points,
+                                    elims: team.elims,
+                                    wins: team.wins,
+                                    games: team.games,
+                                    avg_place: team.avg_place,
+                                    positionChange: newIndicators[team.teamname] || 0,
+                                    hasPositionChanged: false
+                                };
+                            }
+                        } else {
+                            // Nouvelle équipe ou changement de position
+                            return {
+                                ...team,
+                                positionChange: newIndicators[team.teamname] || 0,
+                                hasPositionChanged: changedTeams.has(team.teamname),
+                                teamId: team.teamname
+                            };
                         }
-                        return {
-                            ...team,
-                            positionChange: newIndicators[team.teamname] || 0,
-                            hasPositionChanged: false,
-                            teamId: team.teamname
-                        };
                     });
                 } else {
-                    // Il y a des changements, on met à jour normalement
+                    // Premier chargement
                     updatedLeaderboardData = allLeaderboardData.map(team => {
                         return {
                             ...team,
                             positionChange: newIndicators[team.teamname] || 0,
                             hasPositionChanged: changedTeams.has(team.teamname),
-                            teamId: team.teamname // Identifiant stable pour React
+                            teamId: team.teamname
                         };
                     });
                 }
@@ -359,7 +382,7 @@ function LeaderboardSolary() {
                     
                     setTimeout(() => {
                         setAnimationEnabled(false);
-                    }, 3000); 
+                    }, 2000); 
                 }
                 
                 setShowGamesColumn(hasMultipleGames);
@@ -375,7 +398,7 @@ function LeaderboardSolary() {
         
         loadAllPages();
         
-        const interval = setInterval(loadAllPages, 30000);
+        const interval = setInterval(loadAllPages, 15000);
         
         return () => clearInterval(interval);
     }, [leaderboard_id]);
