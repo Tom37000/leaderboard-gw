@@ -1,7 +1,6 @@
-import './App.css';
+import './LeaderboardCDF.css';
 import React, {useState, useEffect} from "react"
 import { useLocation } from 'react-router-dom';
-import './App.css';
 
 const Row = React.memo(function Row({rank, teamname, points, elims, avg_place, wins, games, order, showGamesColumn, onClick, positionChange, showPositionIndicators, animationEnabled, hasPositionChanged, cascadeFadeEnabled, cascadeIndex}) {
     const renderPositionChange = () => {
@@ -148,7 +147,7 @@ const Row = React.memo(function Row({rank, teamname, points, elims, avg_place, w
     );
 });
 
-function LeaderboardTCS() {
+function LeaderboardCDF() {
 
     const leaderboard_id = new URLSearchParams(useLocation().search).get('id');
 
@@ -493,7 +492,7 @@ function LeaderboardTCS() {
     const displayedLeaderboard = filteredLeaderboard.slice(startIndex, endIndex);
 
     return (
-        <div className='tcs'>
+        <div className='cdf'>
 
             {showSearch && (
                 <div className='search_container'>
@@ -516,7 +515,7 @@ function LeaderboardTCS() {
                     paddingTop: '50px',
                     marginBottom: '20px',
                     fontWeight: 'bold'
-                }}>Classement Centre de Formation | Demi-Finale Lobby 3</div>
+                }}>Classement Centre de Formation | Demi-Finale Lobby 2</div>
 
                 <div className='leaderboard_table'>
                     <div className='header_container'>
@@ -669,4 +668,4 @@ function LeaderboardTCS() {
     );
 }
 
-export default LeaderboardTCS
+export default LeaderboardCDF

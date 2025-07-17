@@ -1,7 +1,6 @@
-import './App.css';
+import './LeaderboardSolary.css';
 import React, { useState, useEffect } from "react";
 import { useLocation } from 'react-router-dom';
-import './App.css';
 
 const Row = React.memo(function Row({ rank, teamname, points, elims, avg_place, wins, games, order, showGamesColumn, onClick, positionChange, showPositionIndicators, animationEnabled, hasPositionChanged, cascadeFadeEnabled, cascadeIndex }) {
     const renderPositionChange = () => {

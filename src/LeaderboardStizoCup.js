@@ -1,7 +1,6 @@
-import './App.css';
+import './LeaderboardStizoCup.css';
 import React, { useState, useEffect } from "react";
 import { useLocation } from 'react-router-dom';
-import './App.css';
 
 function Row({ rank, teamname, points, elims, avg_place, wins, games, order, showGamesColumn, onClick, positionChange, showPositionIndicators, animationEnabled, hasPositionChanged, cascadeFadeEnabled, cascadeIndex }) {
     const renderPositionChange = () => {

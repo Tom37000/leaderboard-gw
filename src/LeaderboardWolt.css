@@ -1,0 +1,71 @@
+@import './common.css';
+
+.wolt_character {
+  --team-stats-label-color: #ffffff;
+  --team-stats-value-color: #ffffff;
+  --team-stats-header-color: #d5393d;
+}
+
+.wolt_character .leaderboard_container {
+  width: 1920px;
+  height: 1080px;
+  background-image: url("leaderboard_background.png");
+}
+
+.leaderboard_container .wolt_character {
+  position: absolute;
+  width: 1920px;
+  height: 1080px;
+  margin-left: -350px;
+  pointer-events: none;
+  background-image: url("wolt_character.png");
+}
+
+.wolt_character .leaderboard_table {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 1200px;
+  background-color: rgba(0, 0, 0, 0.8);
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+}
+
+.wolt_character .row_container {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  margin: 10px 0;
+  background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+  border-radius: 10px;
+  border-left: 4px solid #00d4ff;
+  transition: all 0.3s ease;
+}
+
+.wolt_character .row_container:hover {
+  transform: translateX(5px);
+  box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
+}
+
+.wolt_character .info_box {
+  flex: 1;
+  text-align: center;
+  color: #ffffff;
+  font-family: 'OmnesBlack', sans-serif;
+  font-size: 18px;
+}
+
+.wolt_character .header_container {
+  background: linear-gradient(135deg, #00d4ff, #0099cc);
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  text-align: center;
+  font-family: 'OmnesBlack', sans-serif;
+  font-size: 24px;
+  box-shadow: 0 4px 15px rgba(0, 212, 255, 0.4);
+}
