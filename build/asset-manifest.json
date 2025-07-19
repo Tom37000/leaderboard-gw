@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/leaderboard/build/static/css/main.889cb4f9.css",
-    "main.js": "/leaderboard/build/static/js/main.22611d94.js",
+    "main.css": "/leaderboard/build/static/css/main.12149367.css",
+    "main.js": "/leaderboard/build/static/js/main.487a6397.js",
     "static/js/453.98276a77.chunk.js": "/leaderboard/build/static/js/453.98276a77.chunk.js",
     "static/media/stizo_cup_honda_background.png": "/leaderboard/build/static/media/stizo_cup_honda_background.f9604cfe7796019e0866.png",
     "static/media/reddysh_royale_background.png": "/leaderboard/build/static/media/reddysh_royale_background.84434ba45ecdd7c68360.png",
@@ -14,12 +14,12 @@
     "static/media/Eurostile.otf": "/leaderboard/build/static/media/Eurostile.5af602eec7a5fddc3fd4.otf",
     "static/media/good_times.OTF": "/leaderboard/build/static/media/good_times.a86d4f7f5cdb8cf2e409.OTF",
     "index.html": "/leaderboard/build/index.html",
-    "main.889cb4f9.css.map": "/leaderboard/build/static/css/main.889cb4f9.css.map",
-    "main.22611d94.js.map": "/leaderboard/build/static/js/main.22611d94.js.map",
+    "main.12149367.css.map": "/leaderboard/build/static/css/main.12149367.css.map",
+    "main.487a6397.js.map": "/leaderboard/build/static/js/main.487a6397.js.map",
     "453.98276a77.chunk.js.map": "/leaderboard/build/static/js/453.98276a77.chunk.js.map"
   },
   "entrypoints": [
-    "/leaderboard/static/css/main.889cb4f9.css",
-    "/leaderboard/static/js/main.22611d94.js"
+    "/leaderboard/static/css/main.12149367.css",
+    "/leaderboard/static/js/main.487a6397.js"
   ]
 }

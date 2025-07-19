@@ -1,12 +1,12 @@
 @import './common.css';
 
-.cdf {
+.reload {
   --team-stats-label-color: #ffffff;
   --team-stats-value-color: #ffffff;
-  --team-stats-header-color: #d5393d;
+  --team-stats-header-color: #ff7100;
 }
 
-.cdf .leaderboard_table {
+.reload .leaderboard_table {
   position: absolute;
   width: 100%;
   height: fit-content;
@@ -18,18 +18,18 @@
   gap: 10px;
 }
 
-.cdf .leaderboard_container {
+.reload .leaderboard_container {
   width: 1920px;
   height: 1080px;
-  background: #111258; /*Couleur de fond */
+  background: #464381; /*Couleur de fond */
   background-image: url(""); /* Image de fond */
 }
 
-.cdf .row_container {
+.reload .row_container {
   display: flex;
   gap: 15px;
   color: #ffffff; 
-  box-shadow: inset 0 0 0 5px #d5393d; 
+  box-shadow: inset 0 0 0 5px #ff7100; 
   opacity: 1; 
   position: relative; 
   transform: translateY(0); 
@@ -37,7 +37,7 @@
   will-change: transform, opacity; 
 }
 
-.cdf .row_container .rank_container {
+.reload .row_container .rank_container {
   height: 62px;
   width: 90px;
   margin-left: 5px;
@@ -49,7 +49,7 @@
   font-family: "Eurostile";
 }
 
-.cdf .row_container .name_container {
+.reload .row_container .name_container {
   height: 58px;
   width: 579px;
   display: flex;
@@ -59,9 +59,10 @@
   background-color: transparent;
   font-family: "Eurostile";
   font-size: 26px;
+  color: #ffffff; /* init blanc */
 }
 
-.cdf .row_container .info_box {
+.reload .row_container .info_box {
   height: 58px;
   width: 118.99px;
   display: flex;
@@ -73,14 +74,14 @@
   color: #ffffff; /* init blanc */
 }
 
-.cdf .header_container {
+.reload .header_container {
   display: flex;
   gap: 15px;
-  box-shadow: inset 0 0 0 5px #d5393d; /* init blanc */
-  background-color: #d5393d; /* init blanc */
+  box-shadow: inset 0 0 0 5px #ff7100; /* init blanc */
+  background-color: #ff7100; /* init blanc */
 }
 
-.cdf .header_container .rank_header {
+.reload .header_container .rank_header {
   width: 90px;
   height: 62px;
   margin-left: 5px;
@@ -92,7 +93,7 @@
   font-family: "Eurostile";
 }
 
-.cdf .header_container .name_header {
+.reload .header_container .name_header {
   width: 579px;
   height: 62px;
   display: flex;
@@ -103,7 +104,7 @@
   font-family: "Eurostile";
 }
 
-.cdf .header_container .info_header {
+.reload .header_container .info_header {
   width: 118.99px;
   height: 62px;
   display: flex;
@@ -113,7 +114,7 @@
   font-family: "Eurostile";
 }
 
-.cdf .search_container {
+.reload .search_container {
   display: flex;
   justify-content: center;
   margin-bottom: 20px;
@@ -123,9 +124,9 @@
   z-index: 10;
 }
 
-.cdf .search_input {
+.reload .search_input {
   background-color: var(--team-stats-value-color);
-  border: 2px solid #d5393d;
+  border: 2px solid #ff7100;
   border-radius: 10px;
   padding: 10px 15px;
   font-family: "Eurostile";
@@ -135,12 +136,12 @@
   outline: none;
 }
 
-.cdf .search_input::placeholder {
+.reload .search_input::placeholder {
   color: #000000;
   opacity: 0.7;
 }
 
-.cdf .button_container {
+.reload .button_container {
   position: absolute;
   top: 20px;
   left: 20px;
@@ -149,8 +150,8 @@
   z-index: 100;
 }
 
-.cdf .control_button {
-  background-color: #d5393d;
+.reload .control_button {
+  background-color: #ff7100;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -161,15 +162,15 @@
   transition: background-color 0.3s ease;
 }
 
-.cdf .control_button:hover {
+.reload .control_button:hover {
   background-color: #b8323c;
 }
 
-.cdf .control_button.active {
+.reload .control_button.active {
   background-color: #a02d36;
 }
 
-.cdf .pagination_container {
+.reload .pagination_container {
   position: absolute;
   bottom: 20px;
   left: 50%;
@@ -179,8 +180,8 @@
   z-index: 100;
 }
 
-.cdf .pagination_button {
-  background-color: #d5393d;
+.reload .pagination_button {
+  background-color: #ff7100;
   color: white;
   border: none;
   padding: 8px 16px;
@@ -191,16 +192,16 @@
   transition: background-color 0.3s ease;
 }
 
-.cdf .pagination_button:hover {
-  background-color: #b8323c;
+.reload .pagination_button:hover {
+  background-color: #ff7100;
 }
 
-.cdf .pagination_button:disabled {
+.reload .pagination_button:disabled {
   background-color: #666;
   cursor: not-allowed;
 }
 
-.cdf .page_info {
+.reload .page_info {
   color: white;
   font-family: "Eurostile";
   font-size: 14px;
@@ -209,7 +210,7 @@
   padding: 0 10px;
 }
 
-.cdf .modal_overlay {
+.reload .modal_overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -222,7 +223,7 @@
   z-index: 1000;
 }
 
-.cdf .modal_content {
+.reload .modal_content {
   background-color: #1a1a1a;
   border-radius: 10px;
   padding: 20px;
@@ -234,25 +235,25 @@
   border: 2px solid #333;
 }
 
-.cdf .modal_content::-webkit-scrollbar {
+.reload .modal_content::-webkit-scrollbar {
   width: 8px;
 }
 
-.cdf .modal_content::-webkit-scrollbar-track {
+.reload .modal_content::-webkit-scrollbar-track {
   background: #2a2a2a;
   border-radius: 4px;
 }
 
-.cdf .modal_content::-webkit-scrollbar-thumb {
+.reload .modal_content::-webkit-scrollbar-thumb {
   background: var(--team-stats-header-color);
   border-radius: 4px;
 }
 
-.cdf .modal_content::-webkit-scrollbar-thumb:hover {
-  background: #b8323c;
+.reload .modal_content::-webkit-scrollbar-thumb:hover {
+  background: #ff7100;
 }
 
-.cdf .modal_header {
+.reload .modal_header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -261,12 +262,12 @@
   padding-bottom: 10px;
 }
 
-.cdf .modal_header h2 {
+.reload .modal_header h2 {
   margin: 0;
   color: #fff;
 }
 
-.cdf .close_button {
+.reload .close_button {
   background: none;
   border: none;
   color: #fff;
@@ -280,60 +281,60 @@
   align-items: center;
 }
 
-.cdf .close_button:hover {
+.reload .close_button:hover {
   color: var(--team-stats-header-color);
 }
 
-.cdf .modal_body {
+.reload .modal_body {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
-.cdf .team_summary,
-.cdf .members_section,
-.cdf .sessions_section {
+.reload .team_summary,
+.reload .members_section,
+.reload .sessions_section {
   background-color: #2a2a2a;
   padding: 15px;
   border-radius: 8px;
 }
 
-.cdf .team_summary h3,
-.cdf .members_section h3,
-.cdf .sessions_section h3 {
+.reload .team_summary h3,
+.reload .members_section h3,
+.reload .sessions_section h3 {
   margin: 0 0 10px 0;
   color: var(--team-stats-header-color);
 }
 
-.cdf .team_stats {
+.reload .team_stats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 10px;
 }
 
-.cdf .stat_item {
+.reload .stat_item {
   display: flex;
   justify-content: space-between;
   padding: 5px 0;
   border-bottom: 1px solid #444;
 }
 
-.cdf .stat_label {
+.reload .stat_label {
   color: var(--team-stats-label-color);
   font-weight: bold;
 }
 
-.cdf .stat_value {
+.reload .stat_value {
   color: var(--team-stats-value-color);
 }
 
-.cdf .members_list {
+.reload .members_list {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.cdf .member_item {
+.reload .member_item {
   background-color: #333;
   padding: 10px;
   border-radius: 5px;
@@ -342,23 +343,23 @@
   align-items: center;
 }
 
-.cdf .member_name {
+.reload .member_name {
   font-weight: bold;
   color: #fff;
 }
 
-.cdf .member_ingame {
+.reload .member_ingame {
   color: #ccc;
   font-style: italic;
 }
 
-.cdf .sessions_list {
+.reload .sessions_list {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.cdf .session_item {
+.reload .session_item {
   background-color: #333;
   padding: 8px 12px;
   border-radius: 5px;
@@ -368,18 +369,18 @@
   font-size: 14px;
 }
 
-.cdf .session_stat {
+.reload .session_stat {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-.cdf .session_stat_label {
+.reload .session_stat_label {
   color: #ccc;
   font-size: 12px;
 }
 
-.cdf .session_stat_value {
+.reload .session_stat_value {
   color: #fff;
   font-weight: bold;
 }

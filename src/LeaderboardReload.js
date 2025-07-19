@@ -1,4 +1,4 @@
-import './LeaderboardCDF.css';
+import './LeaderboardReload.css';
 import React, {useState, useEffect} from "react"
 import { useLocation } from 'react-router-dom';
 
@@ -147,7 +147,7 @@ const Row = React.memo(function Row({rank, teamname, points, elims, avg_place, w
     );
 });
 
-function LeaderboardCDF() {
+function LeaderboardReload() {
 
     const leaderboard_id = new URLSearchParams(useLocation().search).get('id');
 
@@ -492,7 +492,7 @@ function LeaderboardCDF() {
     const displayedLeaderboard = filteredLeaderboard.slice(startIndex, endIndex);
 
     return (
-        <div className='cdf'>
+        <div className='reload'>
 
             {showSearch && (
                 <div className='search_container'>
@@ -507,15 +507,6 @@ function LeaderboardCDF() {
             )}
             
             <div className='leaderboard_container'>
-                <div className='leaderboard_title' style={{
-                    fontFamily: 'Eurostile',
-                    fontSize: '32px',
-                    color: '#fff',
-                    textAlign: 'center',
-                    paddingTop: '50px',
-                    marginBottom: '20px',
-                    fontWeight: 'bold'
-                }}>Classement Centre de Formation | Finale</div>
 
                 <div className='leaderboard_table'>
                     <div className='header_container'>
@@ -668,4 +659,4 @@ function LeaderboardCDF() {
     );
 }
 
-export default LeaderboardCDF
+export default LeaderboardReload;
