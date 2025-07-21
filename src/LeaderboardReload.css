@@ -21,8 +21,8 @@
 .reload .leaderboard_container {
   width: 1920px;
   height: 1080px;
-  background: #464381; /*Couleur de fond */
-  background-image: url(""); /* Image de fond */
+  background: linear-gradient(135deg, #2e2c5c, #464381, #6a60d1, #8d84f3); /*Couleur de fond */
+  /* background-image: url("");  Image de fond */
 }
 
 .reload .row_container {

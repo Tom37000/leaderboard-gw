@@ -167,7 +167,7 @@ function LeaderboardReload() {
     const [showPositionIndicators, setShowPositionIndicators] = useState(false);
     const [hasRefreshedOnce, setHasRefreshedOnce] = useState(false);
     const [animationEnabled, setAnimationEnabled] = useState(false);
-    const [cascadeFadeEnabled, setCascadeFadeEnabled] = useState(false);
+    const [cascadeFadeEnabled, setCascadeFadeEnabled] = useState(true);
     const [previousLeaderboard, setPreviousLeaderboard] = useState(null);
     const [isInitialLoad, setIsInitialLoad] = useState(true);
 
