@@ -1,0 +1,119 @@
+@import './common.css';
+
+.gameward_overlay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 20px;
+  font-family: 'Roboto', sans-serif;
+  color: #ffffff;
+  z-index: 1000;
+  overflow: visible;
+}
+
+.player_stats_container {
+  background: #2a274e;
+  border-radius: 12px;
+  padding: 0;
+  margin: 0 0 50px 0;
+  border: 2px solid #ee3043;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.player_stats_container:last-child {
+  margin-bottom: 0;
+}
+
+.player_header {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 20px;
+  background: #ee3043;
+  border-radius: 10px 10px 0 0;
+  gap: 15px;
+}
+
+.player_avatar {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  object-position: center 30%;
+  border-radius: 50%;
+  border: 3px solid #2a274e;
+  display: block;
+}
+
+.player_name {
+  font-size: 2.5em;
+  font-weight: 900;
+  margin: 0;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  flex: 1;
+  text-align: center;
+}
+
+
+
+.stats_display {
+  display: flex;
+  flex-direction: row;
+  padding: 0;
+  margin: 0;
+  border-radius: 0 0 10px 10px;
+  overflow: hidden;
+}
+
+.stat_column {
+  flex: 1;
+  text-align: center;
+  padding: 25px 15px;
+  background: #2a274e;
+  border-right: 2px solid #ee3043;
+}
+
+.stat_column:last-child {
+  border-right: none;
+}
+
+.stat_label {
+  font-size: 1.1em;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.stat_value {
+  font-size: 2em;
+  font-weight: bold;
+  color: #ffffff;
+  margin: 0;
+}
+
+.error_container {
+  text-align: center;
+  padding: 40px 30px;
+  background: #504588;
+  border-radius: 0 0 10px 10px;
+  font-size: 1.2em;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.error_text {
+  font-size: 18px;
+  color: #ffffff;
+  text-align: center;
+}
