@@ -11,12 +11,12 @@ function LeaderboardGameward() {
         {
             wls_player_name: "Iceee",
             display_player_name: "Icee",
-            avatar_image: noeImage
+            avatar_image: iceeImage
         },
         {
             wls_player_name: "Noefn10", 
             display_player_name: "Noé", 
-            avatar_image: iceeImage
+            avatar_image: noeImage
         },
         {
             wls_player_name: "Layn92", 
