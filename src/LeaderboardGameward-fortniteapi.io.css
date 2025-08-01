@@ -5,7 +5,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 400px;
+  width: 500px;
   background: transparent;
   border: none;
   border-radius: 0;
@@ -19,11 +19,12 @@
 .player_stats_container {
   background: #2a274e;
   border-radius: 12px;
-  padding: 0;
-  margin: 0 0 50px 0;
+  padding: 15px 20px;
+  margin: 0 0 15px 0;
   border: 2px solid #fbb804;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: center;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
@@ -31,72 +32,58 @@
   margin-bottom: 0;
 }
 
-.player_header {
-  display: flex;
-  align-items: center;
-  margin: 0;
-  padding: 12px 20px;
-  background: #fbb804;
-  border-radius: 10px 10px 0 0;
-  gap: 15px;
-}
-
-.player_avatar {
-  width: 80px;
-  height: 80px;
-  object-fit: cover;
-  object-position: center 30%;
-  border-radius: 50%;
-  border: 3px solid #2a274e;
-  display: block;
-}
-
-.player_name {
-  font-size: 2.5em;
+.player_name_linear {
+  font-size: 1.8em;
   font-weight: 900;
   margin: 0;
-  color: #ffffff;
+  color: #fbb804;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-  letter-spacing: 2px;
+  letter-spacing: 1px;
   text-transform: uppercase;
-  flex: 1;
-  text-align: center;
+  margin-right: 2px;
+  flex-shrink: 0;
 }
 
 
 
-.stats_display {
+.stats_display_linear {
   display: flex;
   flex-direction: row;
-  padding: 0;
-  margin: 0;
-  border-radius: 0 0 10px 10px;
-  overflow: hidden;
-}
-
-.stat_column {
+  gap: 0;
   flex: 1;
-  text-align: center;
-  padding: 25px 15px;
-  background: #2a274e;
-  border-right: 2px solid #fbb804;
 }
 
-.stat_column:last-child {
-  border-right: none;
+.stat_item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  flex: 1;
+  padding: 0 15px;
+  position: relative;
+}
+
+.stat_item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background-color: #fbb804;
 }
 
 .stat_label {
-  font-size: 1.1em;
+  font-size: 0.9em;
   font-weight: 700;
-  margin-bottom: 8px;
+  margin-bottom: 5px;
   color: #ffffff;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
 .stat_value {
-  font-size: 2em;
+  font-size: 1.6em;
   font-weight: bold;
   color: #ffffff;
   margin: 0;

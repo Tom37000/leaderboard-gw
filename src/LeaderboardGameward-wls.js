@@ -108,37 +108,30 @@ function LeaderboardGameward() {
                 
                 return (
                     <div key={index} className='player_stats_container'>
-                        <div className='player_header'>
-                            <img 
-                                src={config.avatar_image} 
-                                alt="Avatar" 
-                                className='player_avatar' 
-                            />
-                            <div className='player_name'>
-                                {playerData ? playerData.playerName : config.display_player_name}
-                            </div>
+                        <div className='player_name_linear'>
+                            {playerData ? playerData.playerName : config.display_player_name}
                         </div>
                         
-                        <div className='stats_display'>
-                            <div className='stat_column'>
-                                <div className='stat_label'>TOP</div>
-                                <div className='stat_value'>
+                        <div className='stats_display_linear'>
+                            <div className='stat_item'>
+                                <span className='stat_label'>TOP</span>
+                                <span className='stat_value'>
                                     {playerData ? playerData.rank : '-'}
-                                </div>
+                                </span>
                             </div>
                             
-                            <div className='stat_column'>
-                                <div className='stat_label'>POINTS</div>
-                                <div className='stat_value'>
+                            <div className='stat_item'>
+                                <span className='stat_label'>POINTS</span>
+                                <span className='stat_value'>
                                     {playerData ? playerData.points : '-'}
-                                </div>
+                                </span>
                             </div>
                             
-                            <div className='stat_column'>
-                                <div className='stat_label'>GAMES</div>
-                                <div className='stat_value'>
+                            <div className='stat_item'>
+                                <span className='stat_label'>GAMES</span>
+                                <span className='stat_value'>
                                     {playerData ? playerData.games : '-'}
-                                </div>
+                                </span>
                             </div>
                         </div>
                     </div>
