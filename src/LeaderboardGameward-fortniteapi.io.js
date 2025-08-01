@@ -7,7 +7,7 @@ import laynImage from './layn.png';
 
 function LeaderboardGamewardFortniteApi() {
     const eventId = new URLSearchParams(useLocation().search).get('eventId');
-    const API_KEY = 'b9f1b048-929875f7-e8f2f9e4-7c9b36ee';
+    const API_KEY = process.env.REACT_APP_FORTNITE_API_KEY;
     
     const playerConfigs = [
         {
