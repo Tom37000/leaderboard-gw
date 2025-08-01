@@ -1,4 +1,4 @@
-import './LeaderboardGameward.css';
+import './LeaderboardGameward-wls.css';
 import React, { useState, useEffect } from "react";
 import { useLocation } from 'react-router-dom';
 import noeImage from './noe.png';
