@@ -12,7 +12,7 @@
     "453.d9b1943c.chunk.js.map": "/leaderboard-gw/static/js/453.d9b1943c.chunk.js.map"
   },
   "entrypoints": [
-    "/leaderboard-gw/static/css/main.3bc61629.css",
-    "/leaderboard-gw/static/js/main.a294f3ae.js"
+    "static/css/main.3bc61629.css",
+    "static/js/main.a294f3ae.js"
   ]
 }
