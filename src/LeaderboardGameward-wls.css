@@ -26,7 +26,7 @@
   flex-direction: row;
   align-items: stretch;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-  height: 70px;
+  height: 72px;
   width: fit-content;
   overflow: hidden;
 }
@@ -48,7 +48,12 @@
 }
 
 .player_avatar {
-  display: none;
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  margin-right: 15px;
+  border: 3px solid #fbb804;
+  object-fit: cover;
 }
 
 .player_name {
@@ -102,9 +107,6 @@
 }
 
 
-
-
-
 .stat_label {
   font-size: 0.85em;
   font-weight: 700;
@@ -115,10 +117,11 @@
 }
 
 .stat_value {
-  font-size: 1.6em;
+  font-size: 2em;
   font-weight: bold;
   color: #ffffff;
   margin: 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 .error_container {
@@ -135,4 +138,35 @@
   font-size: 18px;
   color: #ffffff;
   text-align: center;
+}
+
+
+@media (max-width: 768px) {
+    .gameward_overlay {
+        padding: 10px;
+    }
+    
+    .player_stats_container {
+        margin-bottom: 15px;
+    }
+    
+    .player_avatar {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .player_name {
+        font-size: 1.2em;
+    }
+    
+    .stat_value {
+        font-size: 1.6em;
+    }
+    
+    .back_to_menu_btn {
+        top: 10px;
+        left: 10px;
+        font-size: 0.8em;
+        padding: 6px 12px;
+    }
 }

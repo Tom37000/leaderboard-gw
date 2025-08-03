@@ -1,12 +1,13 @@
 import './LeaderboardGameward-wls.css';
 import React, { useState, useEffect } from "react";
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import noeImage from './noe.png';
 import iceeImage from './icee.png';
 import laynImage from './layn.png';
 
 function LeaderboardGameward() {
     const leaderboard_id = new URLSearchParams(useLocation().search).get('id');
+    const navigate = useNavigate();
     const playerConfigs = [
         {
             wls_player_name: "Iceee",
@@ -103,6 +104,7 @@ function LeaderboardGameward() {
 
     return (
         <div className='gameward_overlay'>
+
             {playersData.map((playerData, index) => {
                 const config = playerConfigs[index];
                 
