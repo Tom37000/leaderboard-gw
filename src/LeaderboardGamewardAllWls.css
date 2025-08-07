@@ -1,0 +1,227 @@
+@import './common.css';
+
+.summary-overlay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  background: #2a274e;
+  border: 2px solid #fbb804;
+  border-radius: 15px;
+  padding: 30px;
+  font-family: 'Arial', 'Helvetica', sans-serif;
+  color: #ffffff;
+  z-index: 1000;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  overflow: visible;
+}
+
+.summary-title {
+  text-align: center;
+  font-size: 2.0em;
+  font-weight: 900;
+  color: #fbb804;
+  margin-bottom: 25px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: none;
+}
+
+.summary-content {
+  border-radius: 15px;
+  overflow: hidden;
+  background: #2a274e;
+}
+
+.summary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 20px;
+  background: #1f1c3a;
+  border-bottom: 1px solid #3a3458;
+  gap: 15px;
+}
+
+.header-rank {
+  font-size: 1.4em;
+  font-weight: 900;
+  color: #ffffff;
+  text-transform: uppercase;
+  min-width: 50px;
+  text-align: center;
+}
+
+.header-spacer {
+  width: 50px;
+  flex-shrink: 0;
+}
+
+.header-players {
+  font-size: 1.4em;
+  font-weight: 900;
+  color: #ffffff;
+  text-transform: uppercase;
+  flex: 1;
+  text-align: left;
+  margin-left: -10px;
+}
+
+.header-points {
+  font-size: 1.4em;
+  font-weight: 900;
+  color: #ffffff;
+  text-transform: uppercase;
+  min-width: 80px;
+  text-align: right;
+}
+
+.summary-player-simple {
+  background: #2a274e;
+  border-radius: 0;
+  padding: 15px 20px;
+  margin: 0;
+  border: none;
+  border-bottom: 2px solid #ffd700;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  transition: all 0.3s ease;
+  gap: 15px;
+}
+
+.summary-player-simple:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.summary-player-simple:last-child {
+  border-bottom: none;
+}
+
+.summary-player-simple.rank-1 {
+  border-color: #ffd700;
+  background: linear-gradient(135deg, #2a274e 0%, #3a3458 100%);
+}
+
+.summary-player-simple.rank-2 {
+  border-color: #ffd700;
+  background: linear-gradient(135deg, #2a274e 0%, #353050 100%);
+}
+
+.summary-player-simple.rank-3 {
+  border-color: #ffd700;
+  background: linear-gradient(135deg, #2a274e 0%, #352d48 100%);
+}
+
+.player-rank-simple {
+  font-size: 1.4em;
+  font-weight: 900;
+  color: #fbb804;
+  text-transform: uppercase;
+  width: 50px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.summary-player-simple.rank-1 .player-rank-simple {
+  color: #fbb804;
+}
+
+.summary-player-simple.rank-2 .player-rank-simple {
+  color: #fbb804;
+}
+
+.summary-player-simple.rank-3 .player-rank-simple {
+  color: #fbb804;
+}
+
+.summary-avatar-simple {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 2px solid #ffd700;
+  object-fit: cover;
+  flex-shrink: 0;
+  margin-left: 10px;
+}
+
+.summary-player-simple.rank-1 .summary-avatar-simple {
+  border-color: #fbb804;
+}
+
+.summary-player-simple.rank-2 .summary-avatar-simple {
+  border-color: #fbb804;
+}
+
+.summary-player-simple.rank-3 .summary-avatar-simple {
+  border-color: #fbb804;
+}
+
+.player-name-simple {
+  font-size: 1.3em;
+  font-weight: 900;
+  color: #ffffff;
+  width: 150px;
+  text-align: left;
+  margin-left: 15px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.player-points-simple {
+  font-size: 1.4em;
+  font-weight: 900;
+  color: #ffffff;
+  text-transform: uppercase;
+  width: 80px;
+  text-align: right;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.summary-loading {
+  display: none;
+}
+
+.summary-error {
+  text-align: center;
+  padding: 40px 30px;
+  background: #504588;
+  border-radius: 15px;
+  font-size: 1.2em;
+  font-weight: 700;
+  color: #ffffff;
+  border: 2px solid #fbb804;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 768px) {
+  .summary-overlay {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .summary-overlay {
+    padding: 15px;
+  }
+  
+  .summary-title {
+    font-size: 1.4em;
+  }
+  
+  .player-name {
+    font-size: 0.9em;
+  }
+  
+  .stat_value {
+    font-size: 1em;
+  }
+}

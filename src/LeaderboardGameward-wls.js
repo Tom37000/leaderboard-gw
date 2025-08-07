@@ -7,6 +7,7 @@ import laynImage from './layn.png';
 
 function LeaderboardGameward() {
     const leaderboard_id = new URLSearchParams(useLocation().search).get('id');
+    const leaderboard_id2 = new URLSearchParams(useLocation().search).get('id2');
     const navigate = useNavigate();
     const playerConfigs = [
         {
@@ -32,25 +33,37 @@ function LeaderboardGameward() {
     useEffect(() => {
         const loadPlayersData = async () => {
             try {
-                const firstResponse = await fetch(`https://api.wls.gg/v5/leaderboards/${leaderboard_id}?page=0`);
-                const firstData = await firstResponse.json();
+                const loadLeaderboardData = async (leaderboardId) => {
+                    const firstResponse = await fetch(`https://api.wls.gg/v5/leaderboards/${leaderboardId}?page=0`);
+                    const firstData = await firstResponse.json();
+                    
+                    const totalPages = firstData.total_pages || 1;
+                    
+                    const promises = [];
+                    for (let page = 0; page < totalPages; page++) {
+                        promises.push(
+                            fetch(`https://api.wls.gg/v5/leaderboards/${leaderboardId}?page=${page}`)
+                                .then(response => response.json())
+                        );
+                    }
+                    
+                    return await Promise.all(promises);
+                };
+                const allPagesData1 = await loadLeaderboardData(leaderboard_id);
+                let allPagesData2 = [];
                 
-                const totalPages = firstData.total_pages || 1;
-                
-                const promises = [];
-                for (let page = 0; page < totalPages; page++) {
-                    promises.push(
-                        fetch(`https://api.wls.gg/v5/leaderboards/${leaderboard_id}?page=${page}`)
-                            .then(response => response.json())
-                    );
+                if (leaderboard_id2) {
+                    allPagesData2 = await loadLeaderboardData(leaderboard_id2);
                 }
                 
-                const allPagesData = await Promise.all(promises);
                 const foundPlayers = [null, null, null];
                 
                 playerConfigs.forEach((config, index) => {
                     if (config.wls_player_name) {
-                        allPagesData.forEach(data => {
+                        let playerData1 = null;
+                        let playerData2 = null;
+                    
+                        allPagesData1.forEach(data => {
                             for (let team in data.teams) {
                                 const sessions = Object.values(data.teams[team].sessions);
                                 const gamesCount = sessions.length;
@@ -61,9 +74,8 @@ function LeaderboardGameward() {
                                     (member.ingame_name && member.ingame_name.toLowerCase().includes(config.wls_player_name.toLowerCase()))
                                 );
                                 
-                                if (playerInTeam && !foundPlayers[index]) {
-                                    foundPlayers[index] = {
-                                        playerName: config.display_player_name,
+                                if (playerInTeam && !playerData1) {
+                                    playerData1 = {
                                         rank: data.teams[team].place,
                                         points: data.teams[team].points,
                                         games: gamesCount
@@ -71,6 +83,49 @@ function LeaderboardGameward() {
                                 }
                             }
                         });
+                        
+                        if (leaderboard_id2) {
+                            allPagesData2.forEach(data => {
+                                for (let team in data.teams) {
+                                    const sessions = Object.values(data.teams[team].sessions);
+                                    const gamesCount = sessions.length;
+                                    const members = Object.values(data.teams[team].members);
+                                    
+                                    const playerInTeam = members.find(member => 
+                                        member.name.toLowerCase().includes(config.wls_player_name.toLowerCase()) ||
+                                        (member.ingame_name && member.ingame_name.toLowerCase().includes(config.wls_player_name.toLowerCase()))
+                                    );
+                                    
+                                    if (playerInTeam && !playerData2) {
+                                        playerData2 = {
+                                            rank: data.teams[team].place,
+                                            points: data.teams[team].points,
+                                            games: gamesCount
+                                        };
+                                    }
+                                }
+                            });
+                        }
+                        if (playerData1 || playerData2) {
+                            if (leaderboard_id2) {
+                                const data1 = playerData1 || { rank: 999, points: 0, games: 0 };
+                                const data2 = playerData2 || { rank: 999, points: 0, games: 0 };
+                                
+                                foundPlayers[index] = {
+                                    playerName: config.display_player_name,
+                                    rank: Math.min(data1.rank, data2.rank),
+                                    points: data1.points + data2.points,
+                                    games: data1.games + data2.games
+                                };
+                            } else {
+                                foundPlayers[index] = {
+                                    playerName: config.display_player_name,
+                                    rank: playerData1.rank,
+                                    points: playerData1.points,
+                                    games: playerData1.games
+                                };
+                            }
+                        }
                     }
                 });
                 
@@ -89,7 +144,7 @@ function LeaderboardGameward() {
         } else {
             setError('ID du leaderboard manquant');
         }
-    }, [leaderboard_id]);
+    }, [leaderboard_id, leaderboard_id2]);
 
 
     if (error) {
