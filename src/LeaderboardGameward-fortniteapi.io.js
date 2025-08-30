@@ -43,7 +43,7 @@ function PlayerGameSlideshow({ sessionData, playerName, isCumulativeMode, player
         if (gameData.length >= 2) {
 
             const displayDuration = gameData.length * 5000;
-            const totalCycleDuration = displayDuration + 5000; 
+            const cycleDuration = 5 * 60 * 1000; 
             
             const visibilityInterval = setInterval(() => {
                 setCurrentGameIndex(0);
@@ -58,7 +58,7 @@ function PlayerGameSlideshow({ sessionData, playerName, isCumulativeMode, player
                         setContainerVisible(false);
                     }, 400);
                 }, displayDuration);
-            }, totalCycleDuration);
+            }, cycleDuration);
             
             return () => clearInterval(visibilityInterval);
         }
