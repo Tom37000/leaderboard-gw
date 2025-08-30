@@ -1,4 +1,4 @@
-
+@import './common.css';
 
 .gameward_overlay {
   position: fixed;
@@ -23,12 +23,11 @@
   margin: 0 0 25px 0;
   border: 2px solid #fbb804;
   display: flex;
-  flex-direction: column; 
+  flex-direction: row;
   align-items: stretch;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-  width: 100%; 
-  min-width: 500px;
-  max-width: 800px;
+  height: 72px;
+  width: fit-content;
   overflow: hidden;
 }
 
@@ -69,12 +68,7 @@
   text-align: center;
 }
 
-.player_top_section {
-  display: flex;
-  flex-direction: row;
-  align-items: stretch;
-  height: 70px;
-}
+
 
 .stats_display {
   display: flex;
@@ -111,19 +105,7 @@
 .stat_column:last-child::after {
   display: none;
 }
-.resume_label {
-  font-size: 1.2em;
-  font-weight: 800;
-  color: #fbb804;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  padding: 12px 16px;
-  text-align: center;
-  border-top: 2px solid #fbb804;
-  margin: 8px 10px 6px;
-  background-color: rgba(251, 184, 4, 0.12);
-  border-radius: 8px;
-}
+
 
 .stat_label {
   font-size: 0.85em;
@@ -179,5 +161,12 @@
     
     .stat_value {
         font-size: 1.6em;
+    }
+    
+    .back_to_menu_btn {
+        top: 10px;
+        left: 10px;
+        font-size: 0.8em;
+        padding: 6px 12px;
     }
 }

@@ -5,6 +5,105 @@ import noeImage from './noe.png';
 import iceeImage from './icee.png';
 import laynImage from './layn.png';
 
+const extractGameData = (sessionHistory) => {
+    if (!sessionHistory || sessionHistory.length === 0) return [];
+    
+    console.log(`extractGameData - Traitement de ${sessionHistory.length} sessions:`, sessionHistory);
+    
+    return sessionHistory.map((session, index) => {
+        const placement = session.trackedStats?.PLACEMENT_STAT_INDEX || '-';
+        const kills = session.trackedStats?.TEAM_ELIMS_STAT_INDEX || 0;
+        
+        return {
+            gameNumber: index + 1,
+            placement: placement,
+            kills: kills
+        };
+    });
+};
+
+function PlayerGameSlideshow({ sessionData, playerName, isCumulativeMode, playerData }) {
+    const [currentGameIndex, setCurrentGameIndex] = useState(0);
+    const [fadeClass, setFadeClass] = useState('fade-in');
+    const [isVisible, setIsVisible] = useState(false);
+    const [containerVisible, setContainerVisible] = useState(false);
+    
+
+    const gameData = sessionData ? extractGameData(sessionData) : [];
+    
+
+    if (gameData.length > 0) {
+        console.log(`${playerName} - Nombre total de games: ${gameData.length}`);
+        console.log(`${playerName} - Détail des games:`, gameData.map(g => `Game ${g.gameNumber}: Top ${g.placement}, ${g.kills} kills`));
+        console.log(`${playerName} - SessionData brute:`, sessionData);
+    }
+    
+    useEffect(() => {
+
+        if (gameData.length >= 2) {
+
+            const displayDuration = gameData.length * 5000;
+            const totalCycleDuration = displayDuration + 5000; 
+            
+            const visibilityInterval = setInterval(() => {
+                setCurrentGameIndex(0);
+                setContainerVisible(true);
+                setTimeout(() => {
+                    setIsVisible(true);
+                }, 300);
+
+                setTimeout(() => {
+                    setIsVisible(false);
+                    setTimeout(() => {
+                        setContainerVisible(false);
+                    }, 400);
+                }, displayDuration);
+            }, totalCycleDuration);
+            
+            return () => clearInterval(visibilityInterval);
+        }
+    }, [gameData.length]);
+    
+    useEffect(() => {
+        setCurrentGameIndex(0);
+    }, [gameData.length]);
+    
+    useEffect(() => {
+        if (gameData.length > 1 && isVisible) {
+            const interval = setInterval(() => {
+                setFadeClass('fade-out');
+                setTimeout(() => {
+                    setCurrentGameIndex(prev => (prev + 1) % gameData.length);
+                    setFadeClass('fade-in');
+                }, 300);
+            }, 5000);
+            return () => clearInterval(interval);
+        }
+    }, [gameData.length, isVisible]);
+    
+
+    if (!gameData || gameData.length < 2 || !isVisible || !playerData) {
+        return null;
+    }
+    
+    const currentGame = gameData[currentGameIndex];
+    
+    if (!currentGame) {
+        console.error(`${playerName} - currentGame est undefined pour index ${currentGameIndex}, gameData.length: ${gameData.length}`);
+        return null;
+    }
+    
+    console.log(`${playerName} - Affichage game ${currentGameIndex + 1}/${gameData.length}: Game ${currentGame.gameNumber}`);
+    
+    return (
+        <div className={`game_display_container ${containerVisible ? 'visible' : ''}`}>
+            <div className={`game_text ${fadeClass}`}>
+                Game {currentGame.gameNumber} : Top {currentGame.placement}, {currentGame.kills} kills
+            </div>
+        </div>
+    );
+}
+
 function LeaderboardGamewardFortniteApi() {
     const urlParams = new URLSearchParams(useLocation().search);
     const eventId = urlParams.get('eventId');
@@ -13,7 +112,7 @@ function LeaderboardGamewardFortniteApi() {
     
     const isCumulativeMode = eventId2 !== null;
     
-    const playerConfigs = [
+ const playerConfigs = [
         {
             epic_id: "70a8b05d217d47a381e9137b9a0dce51",
             display_player_name: "Icee",
@@ -28,12 +127,23 @@ function LeaderboardGamewardFortniteApi() {
             epic_id: "3ed9da5cff0948c98196c803412d6321", 
             display_player_name: "Layn", 
             avatar_image: laynImage
+        },
+        {
+            epic_id: "",
+            display_player_name: "?",
+            avatar_image: iceeImage
+        },
+        {
+            epic_id: "",
+            display_player_name: "?",
+            avatar_image: iceeImage
         }
     ];
 
-    const [playersData, setPlayersData] = useState([null, null, null]);
+    const [playersData, setPlayersData] = useState([null, null, null, null, null]);
+    const [playersSessionData, setPlayersSessionData] = useState([null, null, null, null, null]);
     const [error, setError] = useState(null);
-    const previousDataRef = useRef([null, null, null]);
+    const previousDataRef = useRef([null, null, null, null, null]);
     
 
     const hasDataChanged = (newData, oldData, index) => {
@@ -156,6 +266,9 @@ function LeaderboardGamewardFortniteApi() {
                          existing.pointsEarned = existing.cumulativePoints;
                          existing.day2SessionHistory = team.sessionHistory || [];
                          existing.sessionHistory = [...existing.day1SessionHistory, ...existing.day2SessionHistory];
+                         console.log(`Combinaison sessions pour équipe ${teamId}: Day1=${existing.day1SessionHistory.length}, Day2=${existing.day2SessionHistory.length}, Total=${existing.sessionHistory.length}`);
+                         console.log(`Détail Day1 sessions équipe ${teamId}:`, existing.day1SessionHistory.map((s, idx) => `Game ${idx + 1}: Top ${s.trackedStats?.PLACEMENT_STAT_INDEX || 'N/A'}`));
+                         console.log(`Détail Day2 sessions équipe ${teamId}:`, existing.day2SessionHistory.map((s, idx) => `Game ${idx + 1}: Top ${s.trackedStats?.PLACEMENT_STAT_INDEX || 'N/A'}`));
                      } else {
                          teamCumulativeData.set(teamId, {
                              ...team,
@@ -169,8 +282,10 @@ function LeaderboardGamewardFortniteApi() {
                              cumulativeGames: day2Stats.games,
                              cumulativeWins: day2Stats.wins,
                              day1SessionHistory: [],
-                             day2SessionHistory: team.sessionHistory || []
+                             day2SessionHistory: team.sessionHistory || [],
+                             sessionHistory: team.sessionHistory || []
                          });
+                         console.log(`Nouvelle équipe ${teamId} (Day2 seulement): ${(team.sessionHistory || []).length} sessions`);
                      }
                  });
                  
@@ -220,6 +335,16 @@ function LeaderboardGamewardFortniteApi() {
                                     console.log(`Joueur ${config.display_player_name} trouvé dans le classement cumulatif, rang ${teamData.rank}`);
                                     
                                     updatePlayerDataIfChanged(newPlayerData, i);
+                                    
+               
+                                    setPlayersSessionData(prevData => {
+                                        const updatedData = [...prevData];
+                                        const sessionHistory = teamData.sessionHistory || [];
+                                        console.log(`Stockage sessionHistory pour ${config.display_player_name}: ${sessionHistory.length} sessions`);
+                                        console.log(`Détail sessions ${config.display_player_name}:`, sessionHistory.map((s, idx) => `Session ${idx + 1}: Placement ${s.trackedStats?.PLACEMENT_STAT_INDEX || 'N/A'}, Kills ${s.trackedStats?.TEAM_ELIMS_STAT_INDEX || 0}`));
+                                        updatedData[i] = sessionHistory;
+                                        return updatedData;
+                                    });
                                 }
                             }
                         }
@@ -271,6 +396,13 @@ function LeaderboardGamewardFortniteApi() {
                                                     
                                                     updatePlayerDataIfChanged(newPlayerData, i);
                                                     
+                                
+                                                    setPlayersSessionData(prevData => {
+                                                        const updatedData = [...prevData];
+                                                        updatedData[i] = teamData.sessionHistory || [];
+                                                        return updatedData;
+                                                    });
+                                                    
                                                     if (playersFound >= playerConfigs.length) {
                                                         console.log('Tous les joueurs trouvés, arrêt de la recherche.');
                                                         return;
@@ -304,14 +436,19 @@ function LeaderboardGamewardFortniteApi() {
                         }
                     } else {
 
-                        const emptyPlayerData = {
-                            playerName: playerConfigs[index].display_player_name,
-                            rank: '-',
-                            points: '-',
-                            games: '-'
-                        };
-                        if (hasDataChanged(emptyPlayerData, previousDataRef.current[index], index)) {
-                            updatePlayerDataIfChanged(emptyPlayerData, index);
+                        if (previousDataRef.current[index] !== null) {
+                            setPlayersData(prevData => {
+                                const updatedData = [...prevData];
+                                updatedData[index] = null;
+                                return updatedData;
+                            });
+                            setPlayersSessionData(prevData => {
+                                const updatedData = [...prevData];
+                                updatedData[index] = null;
+                                return updatedData;
+                            });
+                            previousDataRef.current[index] = null;
+                            console.log(`Joueur ${playerConfigs[index].display_player_name} non trouvé, données supprimées`);
                         }
                     }
                 });
@@ -355,39 +492,50 @@ function LeaderboardGamewardFortniteApi() {
                 
                 return (
                     <div key={index} className='player_stats_container'>
-                        <div className='player_header'>
-                            <img 
-                                src={config.avatar_image} 
-                                alt="Avatar" 
-                                className='player_avatar' 
-                            />
-                            <div className='player_name'>
-                                {playerData ? playerData.playerName : config.display_player_name}
+                        <div className='player_top_section'>
+                            <div className='player_header'>
+                                <img 
+                                    src={config.avatar_image} 
+                                    alt="Avatar" 
+                                    className='player_avatar' 
+                                />
+                                <div className='player_name'>
+                                    {playerData ? playerData.playerName : config.display_player_name}
+                                </div>
                             </div>
+                            
+                            <div className='stats_display'>
+                                <div className='stat_column'>
+                                    <div className='stat_label'>TOP</div>
+                                    <div className='stat_value'>
+                                        {playerData ? playerData.rank : '-'}
+                                    </div>
+                                </div>
+                                
+                                <div className='stat_column'>
+                                    <div className='stat_label'>POINTS</div>
+                                    <div className='stat_value'>
+                                        {playerData ? playerData.points : '-'}
+                                    </div>
+                                </div>
+                                
+                                <div className='stat_column'>
+                                    <div className='stat_label'>{playerData && playerData.games > 1 ? 'GAMES' : 'GAME'}</div>
+                                    <div className='stat_value'>
+                                        {playerData ? playerData.games : '-'}
+                                    </div>
+                                </div>
+                            </div>
+                            
                         </div>
                         
-                        <div className='stats_display'>
-                            <div className='stat_column'>
-                                <div className='stat_label'>TOP</div>
-                                <div className='stat_value'>
-                                    {playerData ? playerData.rank : '-'}
-                                </div>
-                            </div>
-                            
-                            <div className='stat_column'>
-                                <div className='stat_label'>POINTS</div>
-                                <div className='stat_value'>
-                                    {playerData ? playerData.points : '-'}
-                                </div>
-                            </div>
-                            
-                            <div className='stat_column'>
-                                <div className='stat_label'>GAMES</div>
-                                <div className='stat_value'>
-                                    {playerData ? playerData.games : '-'}
-                                </div>
-                            </div>
-                        </div>
+        
+                        <PlayerGameSlideshow 
+                            sessionData={playersSessionData[index]} 
+                            playerName={config.display_player_name}
+                            isCumulativeMode={isCumulativeMode}
+                            playerData={playerData}
+                        />
                     </div>
                 );
             })}
