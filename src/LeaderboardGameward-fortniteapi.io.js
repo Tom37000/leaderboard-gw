@@ -43,7 +43,7 @@ function PlayerGameSlideshow({ sessionData, playerName, isCumulativeMode, player
         if (gameData.length >= 2) {
 
             const displayDuration = gameData.length * 5000;
-            const cycleDuration = 5 * 60 * 1000; 
+            const cycleDuration = 2 * 60 * 1000; 
             
             const visibilityInterval = setInterval(() => {
                 setCurrentGameIndex(0);
@@ -82,7 +82,7 @@ function PlayerGameSlideshow({ sessionData, playerName, isCumulativeMode, player
     }, [gameData.length, isVisible]);
     
 
-    if (!gameData || gameData.length < 2 || !isVisible || !playerData) {
+    if (!gameData || gameData.length < 2 || !containerVisible || !playerData) {
         return null;
     }
     
@@ -137,13 +137,18 @@ function LeaderboardGamewardFortniteApi() {
             epic_id: "",
             display_player_name: "?",
             avatar_image: iceeImage
+        },
+        {
+            epic_id: "",
+            display_player_name: "?",
+            avatar_image: iceeImage
         }
     ];
 
-    const [playersData, setPlayersData] = useState([null, null, null, null, null]);
-    const [playersSessionData, setPlayersSessionData] = useState([null, null, null, null, null]);
+    const [playersData, setPlayersData] = useState([null, null, null, null, null, null]);
+    const [playersSessionData, setPlayersSessionData] = useState([null, null, null, null, null, null]);
     const [error, setError] = useState(null);
-    const previousDataRef = useRef([null, null, null, null, null]);
+    const previousDataRef = useRef([null, null, null, null, null, null]);
     
 
     const hasDataChanged = (newData, oldData, index) => {
@@ -175,6 +180,9 @@ function LeaderboardGamewardFortniteApi() {
             console.log('EventId:', eventId, eventId2 ? `EventId2: ${eventId2}` : '');
             console.log('Configuration des joueurs:', playerConfigs);
             try {
+                const validPlayerConfigs = playerConfigs.filter(config => config.epic_id && config.epic_id.trim() !== "");
+                console.log(`Recherche de ${validPlayerConfigs.length} joueurs avec epic_id valide sur ${playerConfigs.length} configurés`);
+                
                 const foundPlayers = new Array(playerConfigs.length).fill(null);
                 
                 if (isCumulativeMode) {
@@ -319,6 +327,9 @@ function LeaderboardGamewardFortniteApi() {
                         for (let i = 0; i < playerConfigs.length; i++) {
                             if (foundPlayers[i] === null) {
                                 const config = playerConfigs[i];
+                                if (!config.epic_id || config.epic_id.trim() === "") {
+                                    continue;
+                                }
                                 const teamData = cumulativeResults.find(team => 
                                     team.teamAccountIds && team.teamAccountIds.includes(config.epic_id)
                                 );
@@ -350,7 +361,7 @@ function LeaderboardGamewardFortniteApi() {
                         }
                     }
                     
-                    console.log(`Recherche terminée. ${playersFound}/${playerConfigs.length} joueurs trouvés dans le classement cumulatif.`);
+                    console.log(`Recherche terminée. ${playersFound}/${validPlayerConfigs.length} joueurs avec epic_id valide trouvés dans le classement cumulatif.`);
                 } else {
                     console.log('Récupération des données pour un seul événement');
                     
@@ -359,7 +370,7 @@ function LeaderboardGamewardFortniteApi() {
                         let totalPages = 1;
                         let playersFound = 0;
                         
-                        while (page < totalPages && playersFound < playerConfigs.length) {
+                        while (page < totalPages && playersFound < validPlayerConfigs.length) {
                             try {
                                 const response = await fetch(`https://fortniteapi.io/v1/events/window?windowId=${eventId}&page=${page}`, {
                                     headers: {
@@ -379,6 +390,9 @@ function LeaderboardGamewardFortniteApi() {
                                         for (let i = 0; i < playerConfigs.length; i++) {
                                             if (foundPlayers[i] === null) {
                                                 const config = playerConfigs[i];
+                                                if (!config.epic_id || config.epic_id.trim() === "") {
+                                                    continue;
+                                                }
                                                 const teamData = data.session.results.find(team => 
                                                     team.teamAccountIds && team.teamAccountIds.includes(config.epic_id)
                                                 );
@@ -403,8 +417,8 @@ function LeaderboardGamewardFortniteApi() {
                                                         return updatedData;
                                                     });
                                                     
-                                                    if (playersFound >= playerConfigs.length) {
-                                                        console.log('Tous les joueurs trouvés, arrêt de la recherche.');
+                                                    if (playersFound >= validPlayerConfigs.length) {
+                                                        console.log('Tous les joueurs avec epic_id valide trouvés, arrêt de la recherche.');
                                                         return;
                                                     }
                                                 }
@@ -421,7 +435,7 @@ function LeaderboardGamewardFortniteApi() {
                             page++;
                         }
                         
-                        console.log(`Recherche terminée. ${playersFound}/${playerConfigs.length} joueurs trouvés après ${page} pages.`);
+                        console.log(`Recherche terminée. ${playersFound}/${validPlayerConfigs.length} joueurs avec epic_id valide trouvés après ${page} pages.`);
                     };
                     
                     await searchAllPages();
