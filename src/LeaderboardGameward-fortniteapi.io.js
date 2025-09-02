@@ -43,7 +43,7 @@ function PlayerGameSlideshow({ sessionData, playerName, isCumulativeMode, player
         if (gameData.length >= 2) {
 
             const displayDuration = gameData.length * 5000;
-            const cycleDuration = 2 * 60 * 1000; 
+            const cycleDuration = 4 * 60 * 1000; 
             
             const visibilityInterval = setInterval(() => {
                 setCurrentGameIndex(0);
