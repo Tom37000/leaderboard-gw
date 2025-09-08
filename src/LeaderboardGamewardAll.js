@@ -4,6 +4,8 @@ import { useLocation } from 'react-router-dom';
 import noeImage from './noe.png';
 import iceeImage from './icee.png';
 import laynImage from './layn.png';
+import avatarPersonne from './avatar-personne.png';
+
 
 function LeaderboardGamewardAll() {
     const urlParams = new URLSearchParams(useLocation().search);
@@ -13,7 +15,7 @@ function LeaderboardGamewardAll() {
     
     const isCumulativeMode = eventId2 !== null;
     
-    const playerConfigs = [
+ const playerConfigs = [
         {
             epic_id: "70a8b05d217d47a381e9137b9a0dce51",
             display_player_name: "ICEE",
@@ -28,13 +30,42 @@ function LeaderboardGamewardAll() {
             epic_id: "3ed9da5cff0948c98196c803412d6321", 
             display_player_name: "LAYN", 
             avatar_image: laynImage
+        },
+        {
+            epic_id: "d038d3b7a13d4323b2ebca05644d9124",
+            display_player_name: "TYLIO",
+            avatar_image: avatarPersonne
+        },
+        {
+            epic_id: "48a10d6404c649198c8cf382f12253bc",
+            display_player_name: "VOXE",
+            avatar_image: avatarPersonne
+        },
+        {
+            epic_id: "84867c4ef9674c9b838b0c9c815a58fc",
+            display_player_name: "BAXO",
+            avatar_image: avatarPersonne
         }
     ];
 
-    const [playersData, setPlayersData] = useState([null, null, null]);
+    const [playersData, setPlayersData] = useState(
+        playerConfigs.map(config => ({
+            playerName: config.display_player_name,
+            rank: '-',
+            points: '-',
+            games: '-'
+        }))
+    );
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
-    const previousDataRef = useRef([null, null, null]);
+    const previousDataRef = useRef(
+        playerConfigs.map(config => ({
+            playerName: config.display_player_name,
+            rank: '-',
+            points: '-',
+            games: '-'
+        }))
+    );
     
     const hasDataChanged = (newData, oldData, index) => {
         if (!newData && !oldData) return false;
@@ -254,19 +285,7 @@ function LeaderboardGamewardAll() {
                     await searchAllPages();
                 }
                 
-                foundPlayers.forEach((player, index) => {
-                    if (!player) {
-                        const emptyPlayerData = {
-                            playerName: playerConfigs[index].display_player_name,
-                            rank: '-',
-                            points: '-',
-                            games: '-'
-                        };
-                        if (hasDataChanged(emptyPlayerData, previousDataRef.current[index], index)) {
-                            updatePlayerDataIfChanged(emptyPlayerData, index);
-                        }
-                    }
-                });
+                console.log('Données conservées pour les joueurs non trouvés');
                 
                 setError(null);
             } catch (error) {
@@ -299,8 +318,8 @@ function LeaderboardGamewardAll() {
 
     const sortedPlayers = playersData
         .map((playerData, index) => ({ ...playerData, config: playerConfigs[index], index }))
-        .filter(player => player.rank !== '-')
         .sort((a, b) => {
+            if (a.rank === '-' && b.rank === '-') return 0;
             if (a.rank === '-') return 1;
             if (b.rank === '-') return -1;
             return a.rank - b.rank;

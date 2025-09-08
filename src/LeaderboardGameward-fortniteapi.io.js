@@ -129,19 +129,16 @@ function LeaderboardGamewardFortniteApi() {
             avatar_image: laynImage
         },
         {
-            epic_id: "",
-            display_player_name: "?",
-            avatar_image: iceeImage
+            epic_id: "d038d3b7a13d4323b2ebca05644d9124",
+            display_player_name: "Tylio",
         },
         {
-            epic_id: "",
-            display_player_name: "?",
-            avatar_image: iceeImage
+            epic_id: "48a10d6404c649198c8cf382f12253bc",
+            display_player_name: "Voxe",
         },
         {
-            epic_id: "",
-            display_player_name: "?",
-            avatar_image: iceeImage
+            epic_id: "84867c4ef9674c9b838b0c9c815a58fc",
+            display_player_name: "Baxo",
         }
     ];
 
@@ -449,20 +446,8 @@ function LeaderboardGamewardFortniteApi() {
                             updatePlayerDataIfChanged(player, index);
                         }
                     } else {
-
                         if (previousDataRef.current[index] !== null) {
-                            setPlayersData(prevData => {
-                                const updatedData = [...prevData];
-                                updatedData[index] = null;
-                                return updatedData;
-                            });
-                            setPlayersSessionData(prevData => {
-                                const updatedData = [...prevData];
-                                updatedData[index] = null;
-                                return updatedData;
-                            });
-                            previousDataRef.current[index] = null;
-                            console.log(`Joueur ${playerConfigs[index].display_player_name} non trouvé, données supprimées`);
+                            console.log(`Joueur ${playerConfigs[index].display_player_name} non trouvé dans cette mise à jour, conservation des dernières données`);
                         }
                     }
                 });

@@ -4,6 +4,7 @@ import { useLocation } from 'react-router-dom';
 import noeImage from './noe.png';
 import iceeImage from './icee.png';
 import laynImage from './layn.png';
+import avatarPersonne from './avatar-personne.png';
 
 function LeaderboardGamewardAllWls() {
     const urlParams = new URLSearchParams(useLocation().search);
@@ -15,24 +16,39 @@ function LeaderboardGamewardAllWls() {
     const playerConfigs = [
         {
             wls_player_name: "Iceee",
-            display_player_name: "ICEE",
+            display_player_name: "Icee",
             avatar_image: iceeImage
         },
         {
             wls_player_name: "Noefn10", 
-            display_player_name: "NOÉ", 
+            display_player_name: "Noé", 
             avatar_image: noeImage
         },
         {
             wls_player_name: "Layn92", 
-            display_player_name: "LAYN", 
+            display_player_name: "Layn", 
             avatar_image: laynImage
+        },
+        {
+            wls_player_name: "Voxe", 
+            display_player_name: "Voxe", 
+            avatar_image: avatarPersonne
+        },
+        {
+            wls_player_name: "tylio7", 
+            display_player_name: "Tylio", 
+            avatar_image: avatarPersonne
+        },
+        {
+            wls_player_name: "BaxoTv", 
+            display_player_name: "Baxo", 
+            avatar_image: avatarPersonne
         }
     ];
 
-    const [playersData, setPlayersData] = useState([null, null, null]);
+    const [playersData, setPlayersData] = useState(new Array(playerConfigs.length).fill(null));
     const [error, setError] = useState(null);
-    const previousDataRef = useRef([null, null, null]);
+    const previousDataRef = useRef(new Array(playerConfigs.length).fill(null));
     
     const hasDataChanged = (newData, oldData, index) => {
         if (!newData && !oldData) return false;
@@ -73,7 +89,7 @@ function LeaderboardGamewardAllWls() {
                     return await Promise.all(promises);
                 };
                 
-                const foundPlayers = [null, null, null];
+                const foundPlayers = new Array(playerConfigs.length).fill(null);
                 
                 if (isCumulativeMode) {
                     const allPagesData1 = await loadLeaderboardData(leaderboard_id);
@@ -141,11 +157,9 @@ function LeaderboardGamewardAllWls() {
                             totalGames: data.games1 + data.games2
                         }))
                         .sort((a, b) => {
-                            // 1er critère : Points totaux
                             if (b.totalPoints !== a.totalPoints) {
                                 return b.totalPoints - a.totalPoints;
                             }
-                            // 2ème critère : Meilleur rang
                             return a.bestRank - b.bestRank;
                         })
                         .map((player, index) => ({

@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import noeImage from './noe.png';
 import iceeImage from './icee.png';
 import laynImage from './layn.png';
+import avatarPersonne from './avatar-personne.png';
 
 function LeaderboardGameward() {
     const leaderboard_id = new URLSearchParams(useLocation().search).get('id');
@@ -24,10 +25,25 @@ function LeaderboardGameward() {
             wls_player_name: "Layn92", 
             display_player_name: "Layn", 
             avatar_image: laynImage
+        },
+        {
+            wls_player_name: "Voxe", 
+            display_player_name: "Voxe", 
+            avatar_image: avatarPersonne
+        },
+        {
+            wls_player_name: "tylio7", 
+            display_player_name: "Tylio", 
+            avatar_image: avatarPersonne
+        },
+        {
+            wls_player_name: "BaxoTv", 
+            display_player_name: "Baxo", 
+            avatar_image: avatarPersonne
         }
     ];
 
-    const [playersData, setPlayersData] = useState([null, null, null]);
+    const [playersData, setPlayersData] = useState(new Array(playerConfigs.length).fill(null));
     const [error, setError] = useState(null);
 
     useEffect(() => {
@@ -56,7 +72,7 @@ function LeaderboardGameward() {
                     allPagesData2 = await loadLeaderboardData(leaderboard_id2);
                 }
                 
-                const foundPlayers = [null, null, null];
+                const foundPlayers = new Array(playerConfigs.length).fill(null);
                 
                 playerConfigs.forEach((config, index) => {
                     if (config.wls_player_name) {
