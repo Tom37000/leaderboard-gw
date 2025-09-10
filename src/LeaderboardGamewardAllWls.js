@@ -49,6 +49,10 @@ function LeaderboardGamewardAllWls() {
     const [playersData, setPlayersData] = useState(new Array(playerConfigs.length).fill(null));
     const [error, setError] = useState(null);
     const previousDataRef = useRef(new Array(playerConfigs.length).fill(null));
+    const errorCountRef = useRef(0);
+    const lastSuccessRef = useRef(Date.now());
+    const lastValidDataRef = useRef(new Array(playerConfigs.length).fill(null));
+    const retryTimeoutRef = useRef(null);
     
     const hasDataChanged = (newData, oldData, index) => {
         if (!newData && !oldData) return false;
@@ -72,17 +76,47 @@ function LeaderboardGamewardAllWls() {
     useEffect(() => {
         const loadPlayersData = async () => {
             try {
+                const fetchWithRetry = async (url, maxRetries = 3, timeout = 10000) => {
+                    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                        try {
+                            const controller = new AbortController();
+                            const timeoutId = setTimeout(() => controller.abort(), timeout);
+                            
+                            const response = await fetch(url, {
+                                signal: controller.signal,
+                                headers: {
+                                    'Accept': 'application/json',
+                                    'Content-Type': 'application/json'
+                                }
+                            });
+                            
+                            clearTimeout(timeoutId);
+                            
+                            if (!response.ok) {
+                                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                            }
+                            
+                            return await response.json();
+                        } catch (error) {
+                            if (attempt === maxRetries) {
+                                throw new Error(`Échec après ${maxRetries} tentatives: ${error.message}`);
+                            }
+                            
+                            const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000);
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                        }
+                    }
+                };
+                
                 const loadLeaderboardData = async (leaderboardId) => {
-                    const firstResponse = await fetch(`https://api.wls.gg/v5/leaderboards/${leaderboardId}?page=0`);
-                    const firstData = await firstResponse.json();
+                    const firstData = await fetchWithRetry(`https://api.wls.gg/v5/leaderboards/${leaderboardId}?page=0`);
                     
                     const totalPages = firstData.total_pages || 1;
                     
                     const promises = [];
                     for (let page = 0; page < totalPages; page++) {
                         promises.push(
-                            fetch(`https://api.wls.gg/v5/leaderboards/${leaderboardId}?page=${page}`)
-                                .then(response => response.json())
+                            fetchWithRetry(`https://api.wls.gg/v5/leaderboards/${leaderboardId}?page=${page}`)
                         );
                     }
                     
@@ -98,17 +132,17 @@ function LeaderboardGamewardAllWls() {
                     const playerCumulativeData = new Map();
                     
                     allPagesData1.forEach(data => {
-                        for (let team in data.teams) {
-                            const sessions = Object.values(data.teams[team].sessions);
+                        data.teams.forEach(team => {
+                            const sessions = Object.values(team.sessions);
                             const gamesCount = sessions.length;
-                            const members = Object.values(data.teams[team].members);
+                            const members = Object.values(team.members);
                             
                             members.forEach(member => {
                                 const playerKey = member.name.toLowerCase();
                                 if (!playerCumulativeData.has(playerKey)) {
                                     playerCumulativeData.set(playerKey, {
-                                        rank1: data.teams[team].place,
-                                        points1: data.teams[team].points,
+                                        rank1: team.place,
+                                        points1: team.points,
                                         games1: gamesCount,
                                         rank2: 999,
                                         points2: 0,
@@ -117,35 +151,35 @@ function LeaderboardGamewardAllWls() {
                                     });
                                 }
                             });
-                        }
+                        });
                     });
                     
                     allPagesData2.forEach(data => {
-                        for (let team in data.teams) {
-                            const sessions = Object.values(data.teams[team].sessions);
+                        data.teams.forEach(team => {
+                            const sessions = Object.values(team.sessions);
                             const gamesCount = sessions.length;
-                            const members = Object.values(data.teams[team].members);
+                            const members = Object.values(team.members);
                             
                             members.forEach(member => {
                                 const playerKey = member.name.toLowerCase();
                                 if (playerCumulativeData.has(playerKey)) {
                                     const existing = playerCumulativeData.get(playerKey);
-                                    existing.rank2 = data.teams[team].place;
-                                    existing.points2 = data.teams[team].points;
+                                    existing.rank2 = team.place;
+                                    existing.points2 = team.points;
                                     existing.games2 = gamesCount;
                                 } else {
                                     playerCumulativeData.set(playerKey, {
                                         rank1: 999,
                                         points1: 0,
                                         games1: 0,
-                                        rank2: data.teams[team].place,
-                                        points2: data.teams[team].points,
+                                        rank2: team.place,
+                                        points2: team.points,
                                         games2: gamesCount,
                                         member: member
                                     });
                                 }
                             });
-                        }
+                        });
                     });
                     
                     const cumulativeResults = Array.from(playerCumulativeData.entries())
@@ -194,10 +228,10 @@ function LeaderboardGamewardAllWls() {
                             let playerData = null;
                         
                             allPagesData.forEach(data => {
-                                for (let team in data.teams) {
-                                    const sessions = Object.values(data.teams[team].sessions);
+                                data.teams.forEach(team => {
+                                    const sessions = Object.values(team.sessions);
                                     const gamesCount = sessions.length;
-                                    const members = Object.values(data.teams[team].members);
+                                    const members = Object.values(team.members);
                                     
                                     const playerInTeam = members.find(member => 
                                         member.name.toLowerCase().includes(config.wls_player_name.toLowerCase()) ||
@@ -206,12 +240,12 @@ function LeaderboardGamewardAllWls() {
                                     
                                     if (playerInTeam && !playerData) {
                                         playerData = {
-                                            rank: data.teams[team].place,
-                                            points: data.teams[team].points,
+                                            rank: team.place,
+                                            points: team.points,
                                             games: gamesCount
                                         };
                                     }
-                                }
+                                });
                             });
                             
                             if (playerData) {
@@ -241,11 +275,26 @@ function LeaderboardGamewardAllWls() {
                         }
                     }
                 });
-                
+                lastValidDataRef.current = [...foundPlayers];
                 setError(null);
+                errorCountRef.current = 0;
+                lastSuccessRef.current = Date.now();
             } catch (error) {
                 console.error('Error loading players data:', error);
-                setError('Erreur lors du chargement des données: ' + error.message);
+                errorCountRef.current += 1;
+                if (lastValidDataRef.current.some(data => data !== null)) {
+                    console.warn(`Utilisation des dernières données sauvegardées (erreur ${errorCountRef.current}):`, error.message);
+                } else {
+                    console.warn(`Aucune donnée sauvegardée disponible (erreur ${errorCountRef.current}):`, error.message);
+                }
+                setError(null);
+                if (retryTimeoutRef.current) {
+                    clearTimeout(retryTimeoutRef.current);
+                }
+                retryTimeoutRef.current = setTimeout(() => {
+                    console.log(`Nouvelle tentative de récupération des données (tentative ${errorCountRef.current + 1})`);
+                    loadPlayersData();
+                }, 120000);
             }
         };
         
@@ -255,8 +304,13 @@ function LeaderboardGamewardAllWls() {
                 return;
             }
             loadPlayersData();
-            const interval = setInterval(loadPlayersData, 30000); 
-            return () => clearInterval(interval);
+            const interval = setInterval(loadPlayersData, 45000); 
+            return () => {
+                clearInterval(interval);
+                if (retryTimeoutRef.current) {
+                    clearTimeout(retryTimeoutRef.current);
+                }
+            };
         } else {
             setError('ID du leaderboard manquant');
         }
@@ -278,6 +332,8 @@ function LeaderboardGamewardAllWls() {
             if (b.rank === '-') return -1;
             return a.rank - b.rank;
         });
+    
+    
 
     return (
         <div className='summary-overlay'>
