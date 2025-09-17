@@ -23,6 +23,33 @@ const extractGameData = (sessions) => {
     });
 };
 
+const calculateTeamStats = (sessions) => {
+    if (!sessions || Object.keys(sessions).length === 0) {
+        return { 
+            victoryCount: 0, 
+            avgElims: 0, 
+            avgPlacement: 0 
+        };
+    }
+    
+    const games = Object.values(sessions);
+    const totalGames = games.length;
+    const victoryCount = games.filter(game => game.place === 1).length;
+    const totalKills = games.reduce((sum, game) => sum + (game.kills || 0), 0);
+    const avgElims = totalGames > 0 ? totalKills / totalGames : 0;
+    const totalPlacement = games.reduce((sum, game) => {
+        const place = typeof game.place === 'string' ? parseInt(game.place, 10) : game.place;
+        return sum + (isNaN(place) ? 100 : place);
+    }, 0);
+    const avgPlacement = totalGames > 0 ? totalPlacement / totalGames : 100;
+    
+    return {
+        victoryCount,
+        avgElims,
+        avgPlacement
+    };
+};
+
 function PlayerGameSlideshow({ sessionData, playerName, playerData }) {
     const [currentGameIndex, setCurrentGameIndex] = useState(0);
     const [fadeClass, setFadeClass] = useState('fade-in');
@@ -272,9 +299,10 @@ function LeaderboardGameward() {
                                 
                                 foundPlayers[index] = {
                                     playerName: config.display_player_name,
-                                    rank: Math.min(data1.rank, data2.rank),
+                                    rank: null, 
                                     points: data1.points + data2.points,
-                                    games: data1.games + data2.games
+                                    games: data1.games + data2.games,
+                                    bestIndividualRank: Math.min(data1.rank, data2.rank)
                                 };
                                 const combinedSessions = {};
                                 if (sessions1) Object.assign(combinedSessions, sessions1);
@@ -292,6 +320,129 @@ function LeaderboardGameward() {
                         }
                     }
                 });
+                if (leaderboard_id2) {
+                    const allTeamsMap = new Map();
+                    allPagesData1.forEach(data => {
+                        for (let teamId in data.teams) {
+                            const teamData = data.teams[teamId];
+                            const members = Object.values(teamData.members);
+                            const memberNames = members.map(m => m.name.toLowerCase()).sort();
+                            const teamKey = memberNames.join('|');
+                            
+                            allTeamsMap.set(teamKey, {
+                                members: members,
+                                points1: teamData.points,
+                                points2: 0,
+                                rank1: teamData.place,
+                                rank2: 999,
+                                teamKey: teamKey
+                            });
+                        }
+                    });
+                    allPagesData2.forEach(data => {
+                        for (let teamId in data.teams) {
+                            const teamData = data.teams[teamId];
+                            const members = Object.values(teamData.members);
+                            const memberNames = members.map(m => m.name.toLowerCase()).sort();
+                            const teamKey = memberNames.join('|');
+                            
+                            if (allTeamsMap.has(teamKey)) {
+                                const existing = allTeamsMap.get(teamKey);
+                                existing.points2 = teamData.points;
+                                existing.rank2 = teamData.place;
+                            } else {
+                                allTeamsMap.set(teamKey, {
+                                    members: members,
+                                    points1: 0,
+                                    points2: teamData.points,
+                                    rank1: 999,
+                                    rank2: teamData.place,
+                                    teamKey: teamKey
+                                });
+                            }
+                        }
+                    });
+                    const globalTeamRanking = Array.from(allTeamsMap.entries())
+                        .map(([teamKey, data]) => {
+                            const combinedSessions = {};
+                            allPagesData1.forEach(pageData => {
+                                for (let teamId in pageData.teams) {
+                                    const teamData = pageData.teams[teamId];
+                                    const members = Object.values(teamData.members);
+                                    const memberNames = members.map(m => m.name.toLowerCase()).sort();
+                                    const currentTeamKey = memberNames.join('|');
+                                    
+                                    if (currentTeamKey === teamKey) {
+                                        Object.assign(combinedSessions, teamData.sessions || {});
+                                    }
+                                }
+                            });
+                            if (leaderboard_id2) {
+                                allPagesData2.forEach(pageData => {
+                                    for (let teamId in pageData.teams) {
+                                        const teamData = pageData.teams[teamId];
+                                        const members = Object.values(teamData.members);
+                                        const memberNames = members.map(m => m.name.toLowerCase()).sort();
+                                        const currentTeamKey = memberNames.join('|');
+                                        
+                                        if (currentTeamKey === teamKey) {
+                                            Object.assign(combinedSessions, teamData.sessions || {});
+                                        }
+                                    }
+                                });
+                            }
+                            const stats = calculateTeamStats(combinedSessions);
+                            
+                            return {
+                                teamKey,
+                                members: data.members,
+                                totalPoints: data.points1 + data.points2,
+                                bestRank: Math.min(data.rank1, data.rank2),
+                                victoryCount: stats.victoryCount,
+                                avgElims: stats.avgElims,
+                                avgPlacement: stats.avgPlacement,
+                                sessions: combinedSessions
+                            };
+                        })
+                        .sort((a, b) => {
+                            if (b.totalPoints !== a.totalPoints) {
+                                return b.totalPoints - a.totalPoints; 
+                            }
+                            if (b.victoryCount !== a.victoryCount) {
+                                return b.victoryCount - a.victoryCount;
+                            }
+                            if (b.avgElims !== a.avgElims) {
+                                return b.avgElims - a.avgElims;
+                            }
+                            if (a.avgPlacement !== b.avgPlacement) {
+                                return a.avgPlacement - b.avgPlacement;
+                            }
+                            return a.bestRank - b.bestRank;
+                        })
+                        .map((team, index) => ({
+                            ...team,
+                            globalRank: index + 1
+                        }));
+                    
+                    foundPlayers.forEach((player, index) => {
+                        if (player !== null) {
+                            const config = playerConfigs[index];
+                            const playerTeam = globalTeamRanking.find(team => 
+                                team.members.some(member => 
+                                    member.name.toLowerCase().includes(config.wls_player_name.toLowerCase()) ||
+                                    (member.ingame_name && member.ingame_name.toLowerCase().includes(config.wls_player_name.toLowerCase()))
+                                )
+                            );
+                            
+                            if (playerTeam) {
+                                player.rank = playerTeam.globalRank;
+                            } else {
+                                player.rank = player.bestIndividualRank;
+                            }
+                        }
+                    });
+                }
+                
                 lastValidDataRef.current = { players: [...foundPlayers], sessions: [...foundPlayersSessions] };
                 setPlayersData(foundPlayers);
                 setPlayersSessionData(foundPlayersSessions);
