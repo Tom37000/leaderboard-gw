@@ -1,10 +1,38 @@
 import './LeaderboardGamewardAllWls.css';
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation } from 'react-router-dom';
-import noeImage from './noe.png';
 import iceeImage from './icee.png';
-import laynImage from './layn.png';
+import tylioImage from './tylio.png';
+import voxeImage from './voxe.png';
+import baxoImage from './baxo.png';
 import avatarPersonne from './avatar-personne.png';
+
+const calculateTeamStats = (sessions) => {
+    if (!sessions || Object.keys(sessions).length === 0) {
+        return { 
+            victoryCount: 0, 
+            avgElims: 0, 
+            avgPlacement: 0 
+        };
+    }
+    
+    const games = Object.values(sessions);
+    const totalGames = games.length;
+    const victoryCount = games.filter(game => game.place === 1).length;
+    const totalKills = games.reduce((sum, game) => sum + (game.kills || 0), 0);
+    const avgElims = totalGames > 0 ? totalKills / totalGames : 0;
+    const totalPlacement = games.reduce((sum, game) => {
+        const place = typeof game.place === 'string' ? parseInt(game.place, 10) : game.place;
+        return sum + (isNaN(place) ? 100 : place);
+    }, 0);
+    const avgPlacement = totalGames > 0 ? totalPlacement / totalGames : 100;
+    
+    return {
+        victoryCount,
+        avgElims,
+        avgPlacement
+    };
+};
 
 function LeaderboardGamewardAllWls() {
     const urlParams = new URLSearchParams(useLocation().search);
@@ -20,29 +48,19 @@ function LeaderboardGamewardAllWls() {
             avatar_image: iceeImage
         },
         {
-            wls_player_name: "Noefn10", 
-            display_player_name: "Noé", 
-            avatar_image: noeImage
-        },
-        {
-            wls_player_name: "Layn92", 
-            display_player_name: "Layn", 
-            avatar_image: laynImage
-        },
-        {
             wls_player_name: "Voxe", 
             display_player_name: "Voxe", 
-            avatar_image: avatarPersonne
+            avatar_image: voxeImage
         },
         {
             wls_player_name: "tylio7", 
             display_player_name: "Tylio", 
-            avatar_image: avatarPersonne
+            avatar_image: tylioImage
         },
         {
             wls_player_name: "BaxoTv", 
             display_player_name: "Baxo", 
-            avatar_image: avatarPersonne
+            avatar_image: baxoImage
         }
     ];
 
@@ -129,91 +147,128 @@ function LeaderboardGamewardAllWls() {
                     const allPagesData1 = await loadLeaderboardData(leaderboard_id);
                     const allPagesData2 = await loadLeaderboardData(leaderboard_id2);
                     
-                    const playerCumulativeData = new Map();
+                    const allTeamsMap = new Map();
                     
                     allPagesData1.forEach(data => {
-                        data.teams.forEach(team => {
-                            const sessions = Object.values(team.sessions);
-                            const gamesCount = sessions.length;
-                            const members = Object.values(team.members);
+                        for (let teamId in data.teams) {
+                            const teamData = data.teams[teamId];
+                            const members = Object.values(teamData.members);
+                            const memberNames = members.map(m => m.name.toLowerCase()).sort();
+                            const teamKey = memberNames.join('|');
                             
-                            members.forEach(member => {
-                                const playerKey = member.name.toLowerCase();
-                                if (!playerCumulativeData.has(playerKey)) {
-                                    playerCumulativeData.set(playerKey, {
-                                        rank1: team.place,
-                                        points1: team.points,
-                                        games1: gamesCount,
-                                        rank2: 999,
-                                        points2: 0,
-                                        games2: 0,
-                                        member: member
-                                    });
-                                }
+                            allTeamsMap.set(teamKey, {
+                                members: members,
+                                points1: teamData.points,
+                                points2: 0,
+                                rank1: teamData.place,
+                                rank2: 999,
+                                teamKey: teamKey
                             });
-                        });
+                        }
                     });
                     
                     allPagesData2.forEach(data => {
-                        data.teams.forEach(team => {
-                            const sessions = Object.values(team.sessions);
-                            const gamesCount = sessions.length;
-                            const members = Object.values(team.members);
+                        for (let teamId in data.teams) {
+                            const teamData = data.teams[teamId];
+                            const members = Object.values(teamData.members);
+                            const memberNames = members.map(m => m.name.toLowerCase()).sort();
+                            const teamKey = memberNames.join('|');
                             
-                            members.forEach(member => {
-                                const playerKey = member.name.toLowerCase();
-                                if (playerCumulativeData.has(playerKey)) {
-                                    const existing = playerCumulativeData.get(playerKey);
-                                    existing.rank2 = team.place;
-                                    existing.points2 = team.points;
-                                    existing.games2 = gamesCount;
-                                } else {
-                                    playerCumulativeData.set(playerKey, {
-                                        rank1: 999,
-                                        points1: 0,
-                                        games1: 0,
-                                        rank2: team.place,
-                                        points2: team.points,
-                                        games2: gamesCount,
-                                        member: member
-                                    });
-                                }
-                            });
-                        });
+                            if (allTeamsMap.has(teamKey)) {
+                                const existing = allTeamsMap.get(teamKey);
+                                existing.points2 = teamData.points;
+                                existing.rank2 = teamData.place;
+                            } else {
+                                allTeamsMap.set(teamKey, {
+                                    members: members,
+                                    points1: 0,
+                                    points2: teamData.points,
+                                    rank1: 999,
+                                    rank2: teamData.place,
+                                    teamKey: teamKey
+                                });
+                            }
+                        }
                     });
                     
-                    const cumulativeResults = Array.from(playerCumulativeData.entries())
-                        .map(([playerKey, data]) => ({
-                            playerKey,
-                            member: data.member,
-                            bestRank: Math.min(data.rank1, data.rank2),
-                            totalPoints: data.points1 + data.points2,
-                            totalGames: data.games1 + data.games2
-                        }))
+                    const globalTeamRanking = Array.from(allTeamsMap.entries())
+                        .map(([teamKey, data]) => {
+                            const combinedSessions = {};
+                            
+                            allPagesData1.forEach(pageData => {
+                                for (let teamId in pageData.teams) {
+                                    const teamData = pageData.teams[teamId];
+                                    const members = Object.values(teamData.members);
+                                    const memberNames = members.map(m => m.name.toLowerCase()).sort();
+                                    const currentTeamKey = memberNames.join('|');
+                                    
+                                    if (currentTeamKey === teamKey) {
+                                        Object.assign(combinedSessions, teamData.sessions || {});
+                                    }
+                                }
+                            });
+                            
+                            allPagesData2.forEach(pageData => {
+                                for (let teamId in pageData.teams) {
+                                    const teamData = pageData.teams[teamId];
+                                    const members = Object.values(teamData.members);
+                                    const memberNames = members.map(m => m.name.toLowerCase()).sort();
+                                    const currentTeamKey = memberNames.join('|');
+                                    
+                                    if (currentTeamKey === teamKey) {
+                                        Object.assign(combinedSessions, teamData.sessions || {});
+                                    }
+                                }
+                            });
+                            
+                            const stats = calculateTeamStats(combinedSessions);
+                            
+                            return {
+                                teamKey,
+                                members: data.members,
+                                totalPoints: data.points1 + data.points2,
+                                bestRank: Math.min(data.rank1, data.rank2),
+                                victoryCount: stats.victoryCount,
+                                avgElims: stats.avgElims,
+                                avgPlacement: stats.avgPlacement,
+                                sessions: combinedSessions
+                            };
+                        })
                         .sort((a, b) => {
                             if (b.totalPoints !== a.totalPoints) {
-                                return b.totalPoints - a.totalPoints;
+                                return b.totalPoints - a.totalPoints; 
+                            }
+                            if (b.victoryCount !== a.victoryCount) {
+                                return b.victoryCount - a.victoryCount;
+                            }
+                            if (b.avgElims !== a.avgElims) {
+                                return b.avgElims - a.avgElims;
+                            }
+                            if (a.avgPlacement !== b.avgPlacement) {
+                                return a.avgPlacement - b.avgPlacement;
                             }
                             return a.bestRank - b.bestRank;
                         })
-                        .map((player, index) => ({
-                            ...player,
-                            rank: index + 1
+                        .map((team, index) => ({
+                            ...team,
+                            globalRank: index + 1
                         }));
                     
                     playerConfigs.forEach((config, index) => {
                         if (config.wls_player_name) {
-                            const playerResult = cumulativeResults.find(result => 
-                                result.member.name.toLowerCase().includes(config.wls_player_name.toLowerCase()) ||
-                                (result.member.ingame_name && result.member.ingame_name.toLowerCase().includes(config.wls_player_name.toLowerCase()))
+                            const playerTeam = globalTeamRanking.find(team => 
+                                team.members.some(member => 
+                                    member.name.toLowerCase().includes(config.wls_player_name.toLowerCase()) ||
+                                    (member.ingame_name && member.ingame_name.toLowerCase().includes(config.wls_player_name.toLowerCase()))
+                                )
                             );
                             
-                            if (playerResult) {
+                            if (playerTeam) {
                                 const newPlayerData = {
                                     playerName: config.display_player_name,
-                                    rank: playerResult.rank,
-                                    points: playerResult.totalPoints,
-                                    games: playerResult.totalGames
+                                    rank: playerTeam.globalRank,
+                                    points: playerTeam.totalPoints,
+                                    games: Object.keys(playerTeam.sessions).length
                                 };
                                 foundPlayers[index] = newPlayerData;
                                 updatePlayerDataIfChanged(newPlayerData, index);
@@ -280,19 +335,15 @@ function LeaderboardGamewardAllWls() {
                 errorCountRef.current = 0;
                 lastSuccessRef.current = Date.now();
             } catch (error) {
-                console.error('Error loading players data:', error);
                 errorCountRef.current += 1;
                 if (lastValidDataRef.current.some(data => data !== null)) {
-                    console.warn(`Utilisation des dernières données sauvegardées (erreur ${errorCountRef.current}):`, error.message);
                 } else {
-                    console.warn(`Aucune donnée sauvegardée disponible (erreur ${errorCountRef.current}):`, error.message);
                 }
                 setError(null);
                 if (retryTimeoutRef.current) {
                     clearTimeout(retryTimeoutRef.current);
                 }
                 retryTimeoutRef.current = setTimeout(() => {
-                    console.log(`Nouvelle tentative de récupération des données (tentative ${errorCountRef.current + 1})`);
                     loadPlayersData();
                 }, 120000);
             }
@@ -304,7 +355,7 @@ function LeaderboardGamewardAllWls() {
                 return;
             }
             loadPlayersData();
-            const interval = setInterval(loadPlayersData, 45000); 
+            const interval = setInterval(loadPlayersData, 20000); 
             return () => {
                 clearInterval(interval);
                 if (retryTimeoutRef.current) {

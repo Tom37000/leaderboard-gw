@@ -1,14 +1,12 @@
 import './LeaderboardGameward-fortniteapi.io.css';
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation } from 'react-router-dom';
-import noeImage from './noe.png';
 import iceeImage from './icee.png';
-import laynImage from './layn.png';
+import tylioImage from './tylio.png';
+import voxeImage from './voxe.png';
 
 const extractGameData = (sessionHistory) => {
     if (!sessionHistory || sessionHistory.length === 0) return [];
-    
-    console.log(`extractGameData - Traitement de ${sessionHistory.length} sessions:`, sessionHistory);
     
     return sessionHistory.map((session, index) => {
         const placement = session.trackedStats?.PLACEMENT_STAT_INDEX || '-';
@@ -28,20 +26,10 @@ function PlayerGameSlideshow({ sessionData, playerName, isCumulativeMode, player
     const [isVisible, setIsVisible] = useState(false);
     const [containerVisible, setContainerVisible] = useState(false);
     
-
     const gameData = sessionData ? extractGameData(sessionData) : [];
     
-
-    if (gameData.length > 0) {
-        console.log(`${playerName} - Nombre total de games: ${gameData.length}`);
-        console.log(`${playerName} - Détail des games:`, gameData.map(g => `Game ${g.gameNumber}: Top ${g.placement}, ${g.kills} kills`));
-        console.log(`${playerName} - SessionData brute:`, sessionData);
-    }
-    
     useEffect(() => {
-
         if (gameData.length >= 2) {
-
             const displayDuration = gameData.length * 5000;
             const cycleDuration = 4 * 60 * 1000; 
             
@@ -81,7 +69,6 @@ function PlayerGameSlideshow({ sessionData, playerName, isCumulativeMode, player
         }
     }, [gameData.length, isVisible]);
     
-
     if (!gameData || gameData.length < 2 || !containerVisible || !playerData) {
         return null;
     }
@@ -89,11 +76,8 @@ function PlayerGameSlideshow({ sessionData, playerName, isCumulativeMode, player
     const currentGame = gameData[currentGameIndex];
     
     if (!currentGame) {
-        console.error(`${playerName} - currentGame est undefined pour index ${currentGameIndex}, gameData.length: ${gameData.length}`);
         return null;
     }
-    
-    console.log(`${playerName} - Affichage game ${currentGameIndex + 1}/${gameData.length}: Game ${currentGame.gameNumber}`);
     
     return (
         <div className={`game_display_container ${containerVisible ? 'visible' : ''}`}>
@@ -119,22 +103,22 @@ function LeaderboardGamewardFortniteApi() {
             avatar_image: iceeImage
         },
         {
-            epic_id: "31d45164d7cc4c96bef16da56c2b5f8c", 
-            display_player_name: "Noé", 
-            avatar_image: noeImage
+            epic_id: "", 
+            display_player_name: ""
         },
         {
-            epic_id: "3ed9da5cff0948c98196c803412d6321", 
-            display_player_name: "Layn", 
-            avatar_image: laynImage
+            epic_id: "", 
+            display_player_name: ""
         },
         {
             epic_id: "d038d3b7a13d4323b2ebca05644d9124",
             display_player_name: "Tylio",
+            avatar_image: tylioImage
         },
         {
             epic_id: "48a10d6404c649198c8cf382f12253bc",
             display_player_name: "Voxe",
+            avatar_image: voxeImage
         },
         {
             epic_id: "84867c4ef9674c9b838b0c9c815a58fc",
@@ -147,7 +131,6 @@ function LeaderboardGamewardFortniteApi() {
     const [error, setError] = useState(null);
     const previousDataRef = useRef([null, null, null, null, null, null]);
     
-
     const hasDataChanged = (newData, oldData, index) => {
         if (!newData && !oldData) return false;
         if (!newData || !oldData) return true;
@@ -156,7 +139,6 @@ function LeaderboardGamewardFortniteApi() {
                newData.games !== oldData.games;
     };
     
-
     const updatePlayerDataIfChanged = (newPlayerData, index) => {
         if (hasDataChanged(newPlayerData, previousDataRef.current[index], index)) {
             setPlayersData(prevData => {
@@ -165,30 +147,21 @@ function LeaderboardGamewardFortniteApi() {
                 return updatedData;
             });
             previousDataRef.current[index] = newPlayerData;
-            console.log(`Données mises à jour pour ${newPlayerData.playerName}:`, newPlayerData);
         } else {
-            console.log(`Aucun changement pour ${newPlayerData.playerName}`);
         }
     };
 
     useEffect(() => {
         const loadPlayersData = async () => {
-            console.log('Mode:', isCumulativeMode ? 'Cumulatif' : 'Non-cumulatif');
-            console.log('EventId:', eventId, eventId2 ? `EventId2: ${eventId2}` : '');
-            console.log('Configuration des joueurs:', playerConfigs);
             try {
                 const validPlayerConfigs = playerConfigs.filter(config => config.epic_id && config.epic_id.trim() !== "");
-                console.log(`Recherche de ${validPlayerConfigs.length} joueurs avec epic_id valide sur ${playerConfigs.length} configurés`);
                 
                 const foundPlayers = new Array(playerConfigs.length).fill(null);
                 
                 if (isCumulativeMode) {
-                    console.log('Récupération des données cumulatives pour les deux événements');
-                    
                     const day1Url = `https://fortniteapi.io/v1/events/window?windowId=${eventId}`;
                     const day2Url = `https://fortniteapi.io/v1/events/window?windowId=${eventId2}`;
                 
-
                 const fetchEventData = async (url) => {
                     const allResults = [];
                     let page = 0;
@@ -219,9 +192,7 @@ function LeaderboardGamewardFortniteApi() {
                     return allResults;
                 };
                 
-                    console.log('Récupération des données du premier événement...');
                     const day1Results = await fetchEventData(day1Url);
-                    console.log('Récupération des données du deuxième événement...');
                     const day2Results = await fetchEventData(day2Url);
                     const teamCumulativeData = new Map();
                 
@@ -271,9 +242,6 @@ function LeaderboardGamewardFortniteApi() {
                          existing.pointsEarned = existing.cumulativePoints;
                          existing.day2SessionHistory = team.sessionHistory || [];
                          existing.sessionHistory = [...existing.day1SessionHistory, ...existing.day2SessionHistory];
-                         console.log(`Combinaison sessions pour équipe ${teamId}: Day1=${existing.day1SessionHistory.length}, Day2=${existing.day2SessionHistory.length}, Total=${existing.sessionHistory.length}`);
-                         console.log(`Détail Day1 sessions équipe ${teamId}:`, existing.day1SessionHistory.map((s, idx) => `Game ${idx + 1}: Top ${s.trackedStats?.PLACEMENT_STAT_INDEX || 'N/A'}`));
-                         console.log(`Détail Day2 sessions équipe ${teamId}:`, existing.day2SessionHistory.map((s, idx) => `Game ${idx + 1}: Top ${s.trackedStats?.PLACEMENT_STAT_INDEX || 'N/A'}`));
                      } else {
                          teamCumulativeData.set(teamId, {
                              ...team,
@@ -290,7 +258,6 @@ function LeaderboardGamewardFortniteApi() {
                              day2SessionHistory: team.sessionHistory || [],
                              sessionHistory: team.sessionHistory || []
                          });
-                         console.log(`Nouvelle équipe ${teamId} (Day2 seulement): ${(team.sessionHistory || []).length} sessions`);
                      }
                  });
                  
@@ -316,8 +283,6 @@ function LeaderboardGamewardFortniteApi() {
                         pointsEarned: team.cumulativePoints
                     }));
                 
-                    console.log('Classement cumulatif calculé:', cumulativeResults.length, 'équipes');
-                    
                     let playersFound = 0;
                     
                     if (cumulativeResults && cumulativeResults.length > 0) {
@@ -340,16 +305,12 @@ function LeaderboardGamewardFortniteApi() {
                                      };
                                     foundPlayers[i] = newPlayerData;
                                     playersFound++;
-                                    console.log(`Joueur ${config.display_player_name} trouvé dans le classement cumulatif, rang ${teamData.rank}`);
                                     
                                     updatePlayerDataIfChanged(newPlayerData, i);
                                     
-               
                                     setPlayersSessionData(prevData => {
                                         const updatedData = [...prevData];
                                         const sessionHistory = teamData.sessionHistory || [];
-                                        console.log(`Stockage sessionHistory pour ${config.display_player_name}: ${sessionHistory.length} sessions`);
-                                        console.log(`Détail sessions ${config.display_player_name}:`, sessionHistory.map((s, idx) => `Session ${idx + 1}: Placement ${s.trackedStats?.PLACEMENT_STAT_INDEX || 'N/A'}, Kills ${s.trackedStats?.TEAM_ELIMS_STAT_INDEX || 0}`));
                                         updatedData[i] = sessionHistory;
                                         return updatedData;
                                     });
@@ -357,11 +318,7 @@ function LeaderboardGamewardFortniteApi() {
                             }
                         }
                     }
-                    
-                    console.log(`Recherche terminée. ${playersFound}/${validPlayerConfigs.length} joueurs avec epic_id valide trouvés dans le classement cumulatif.`);
                 } else {
-                    console.log('Récupération des données pour un seul événement');
-                    
                     const searchAllPages = async () => {
                         let page = 0;
                         let totalPages = 1;
@@ -377,7 +334,6 @@ function LeaderboardGamewardFortniteApi() {
                                 
                                 if (response.ok) {
                                     const data = await response.json();
-                                    console.log(`Réponse API page ${page}:`, data);
                                     
                                     if (data.result && data.session && data.session.results && data.session.results.length > 0) {
                                         if (data.totalPages !== undefined) {
@@ -403,11 +359,9 @@ function LeaderboardGamewardFortniteApi() {
                                                     };
                                                     foundPlayers[i] = newPlayerData;
                                                     playersFound++;
-                                                    console.log(`Joueur ${config.display_player_name} trouvé à la page ${page}, rang ${teamData.rank}`);
                                                     
                                                     updatePlayerDataIfChanged(newPlayerData, i);
                                                     
-                                
                                                     setPlayersSessionData(prevData => {
                                                         const updatedData = [...prevData];
                                                         updatedData[i] = teamData.sessionHistory || [];
@@ -415,7 +369,6 @@ function LeaderboardGamewardFortniteApi() {
                                                     });
                                                     
                                                     if (playersFound >= validPlayerConfigs.length) {
-                                                        console.log('Tous les joueurs avec epic_id valide trouvés, arrêt de la recherche.');
                                                         return;
                                                     }
                                                 }
@@ -423,37 +376,29 @@ function LeaderboardGamewardFortniteApi() {
                                         }
                                     }
                                 } else {
-                                    console.error(`Erreur API page ${page}:`, response.status);
                                 }
                             } catch (pageError) {
-                                console.error(`Erreur lors du chargement de la page ${page}:`, pageError);
                             }
                             
                             page++;
                         }
-                        
-                        console.log(`Recherche terminée. ${playersFound}/${validPlayerConfigs.length} joueurs avec epic_id valide trouvés après ${page} pages.`);
                     };
                     
                     await searchAllPages();
                 }
                 
-
                 foundPlayers.forEach((player, index) => {
                     if (player) {
-
                         if (hasDataChanged(player, previousDataRef.current[index], index)) {
                             updatePlayerDataIfChanged(player, index);
                         }
                     } else {
                         if (previousDataRef.current[index] !== null) {
-                            console.log(`Joueur ${playerConfigs[index].display_player_name} non trouvé dans cette mise à jour, conservation des dernières données`);
                         }
                     }
                 });
                 setError(null);
             } catch (error) {
-                console.error('Error loading players data:', error);
                 setError('Erreur lors du chargement des données: ' + error.message);
             }
         };
@@ -471,9 +416,6 @@ function LeaderboardGamewardFortniteApi() {
         }
     }, [eventId, eventId2, isCumulativeMode]);
 
-
-
-
     if (error) {
         return (
             <div className='gameward_overlay'>
@@ -488,6 +430,9 @@ function LeaderboardGamewardFortniteApi() {
         <div className='gameward_overlay'>
             {playersData.map((playerData, index) => {
                 const config = playerConfigs[index];
+                if (!config.display_player_name || config.display_player_name.trim() === "") {
+                    return null;
+                }
                 
                 return (
                     <div key={index} className='player_stats_container'>
@@ -528,7 +473,6 @@ function LeaderboardGamewardFortniteApi() {
                             
                         </div>
                         
-        
                         <PlayerGameSlideshow 
                             sessionData={playersSessionData[index]} 
                             playerName={config.display_player_name}

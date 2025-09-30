@@ -1,15 +1,13 @@
 import './LeaderboardGameward-wls.css';
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from 'react-router-dom';
-import noeImage from './noe.png';
 import iceeImage from './icee.png';
-import laynImage from './layn.png';
+import tylioImage from './tylio.png';
+import voxeImage from './voxe.png';
 import avatarPersonne from './avatar-personne.png';
 
 const extractGameData = (sessions) => {
     if (!sessions || Object.keys(sessions).length === 0) return [];
-    
-    console.log(`extractGameData - Traitement de ${Object.keys(sessions).length} sessions:`, sessions);
     
     return Object.values(sessions).map((session, index) => {
         const placement = session.place || '-';
@@ -58,29 +56,19 @@ function PlayerGameSlideshow({ sessionData, playerName, playerData }) {
     
     const gameData = sessionData ? extractGameData(sessionData) : [];
     
-    if (gameData.length > 0) {
-        console.log(`${playerName} - Nombre total de games: ${gameData.length}`);
-        console.log(`${playerName} - Détail des games:`, gameData.map(g => `Game ${g.gameNumber}: Top ${g.placement}, ${g.kills} kills`));
-    }
-    
     useEffect(() => {
         if (gameData.length >= 2) {
             const displayDuration = gameData.length * 5000;
             const cycleDuration = 4 * 60 * 1000; 
             
-            console.log(` [${playerName}] Slideshow configuré: ${gameData.length} games, cycle de ${cycleDuration/1000}s, affichage de ${displayDuration/1000}s`);
-            
             const visibilityInterval = setInterval(() => {
-                console.log(`🔄 [${playerName}] Début du cycle slideshow - ${new Date().toLocaleTimeString()}`);
                 setCurrentGameIndex(0);
                 setContainerVisible(true);
                 setTimeout(() => {
                     setIsVisible(true);
-                    console.log(` [${playerName}] Slideshow visible - Game 1/${gameData.length}`);
                 }, 300);
 
                 setTimeout(() => {
-                    console.log(` [${playerName}] Fin du cycle slideshow - ${new Date().toLocaleTimeString()}`);
                     setIsVisible(false);
                     setTimeout(() => {
                         setContainerVisible(false);
@@ -104,7 +92,6 @@ function PlayerGameSlideshow({ sessionData, playerName, playerData }) {
                     setCurrentGameIndex(prev => {
                         const nextIndex = (prev + 1) % gameData.length;
                         const currentGame = gameData[nextIndex];
-                        console.log(` [${playerName}] Affichage Game ${nextIndex + 1}/${gameData.length}: Top ${currentGame.placement}, ${currentGame.kills} kills - ${new Date().toLocaleTimeString()}`);
                         return nextIndex;
                     });
                     setFadeClass('fade-in');
@@ -121,11 +108,8 @@ function PlayerGameSlideshow({ sessionData, playerName, playerData }) {
     const currentGame = gameData[currentGameIndex];
     
     if (!currentGame) {
-        console.error(`${playerName} - currentGame est undefined pour index ${currentGameIndex}, gameData.length: ${gameData.length}`);
         return null;
     }
-    
-    console.log(`${playerName} - Affichage game ${currentGameIndex + 1}/${gameData.length}: Game ${currentGame.gameNumber}`);
     
     return (
         <div className={`game_display_container ${containerVisible ? 'visible' : ''}`}>
@@ -147,24 +131,24 @@ function LeaderboardGameward() {
             avatar_image: iceeImage
         },
         {
-            wls_player_name: "Noefn10", 
-            display_player_name: "Noé", 
-            avatar_image: noeImage
+            wls_player_name: "", 
+            display_player_name: "", 
+            avatar_image: avatarPersonne
         },
         {
-            wls_player_name: "Layn92", 
-            display_player_name: "Layn", 
-            avatar_image: laynImage
+            wls_player_name: "", 
+            display_player_name: "", 
+            avatar_image: avatarPersonne
         },
         {
             wls_player_name: "Voxe", 
             display_player_name: "Voxe", 
-            avatar_image: avatarPersonne
+            avatar_image: voxeImage
         },
         {
             wls_player_name: "tylio7", 
             display_player_name: "Tylio", 
-            avatar_image: avatarPersonne
+            avatar_image: tylioImage
         },
         {
             wls_player_name: "BaxoTv", 
@@ -450,27 +434,23 @@ function LeaderboardGameward() {
                 errorCountRef.current = 0;
                 lastSuccessRef.current = Date.now();
             } catch (error) {
-                console.error('Error loading players data:', error);
                 errorCountRef.current += 1;
                 if (lastValidDataRef.current.players.some(data => data !== null)) {
-                    console.warn(`Utilisation des dernières données sauvegardées (erreur ${errorCountRef.current}):`, error.message);
                 } else {
-                    console.warn(`Aucune donnée sauvegardée disponible (erreur ${errorCountRef.current}):`, error.message);
                 }
                 setError(null);
                 if (retryTimeoutRef.current) {
                     clearTimeout(retryTimeoutRef.current);
                 }
                 retryTimeoutRef.current = setTimeout(() => {
-                    console.log(`Nouvelle tentative de récupération des données (tentative ${errorCountRef.current + 1})`);
                     loadPlayersData();
-                }, 120000); 
+                }, 20000); 
             }
         };
         
         if (leaderboard_id) {
             loadPlayersData();
-            const interval = setInterval(loadPlayersData, 120000);
+            const interval = setInterval(loadPlayersData, 20000);
             return () => {
                 clearInterval(interval);
                 if (retryTimeoutRef.current) {
@@ -498,6 +478,10 @@ function LeaderboardGameward() {
 
             {playersData.map((playerData, index) => {
                 const config = playerConfigs[index];
+                
+                if (!config.display_player_name || config.display_player_name.trim() === "") {
+                    return null;
+                }
                 
                 return (
                     <div key={index} className='player_stats_container'>

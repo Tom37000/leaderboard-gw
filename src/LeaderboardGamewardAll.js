@@ -1,9 +1,10 @@
 import './LeaderboardGamewardAll.css';
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation } from 'react-router-dom';
-import noeImage from './noe.png';
 import iceeImage from './icee.png';
-import laynImage from './layn.png';
+import tylioImage from './tylio.png';
+import voxeImage from './voxe.png';
+import baxoImage from './baxo.png';
 import avatarPersonne from './avatar-personne.png';
 
 
@@ -24,27 +25,27 @@ function LeaderboardGamewardAll() {
         {
             epic_id: "31d45164d7cc4c96bef16da56c2b5f8c", 
             display_player_name: "NOÉ", 
-            avatar_image: noeImage
+            avatar_image: avatarPersonne
         },
         {
             epic_id: "3ed9da5cff0948c98196c803412d6321", 
             display_player_name: "LAYN", 
-            avatar_image: laynImage
+            avatar_image: avatarPersonne
         },
         {
             epic_id: "d038d3b7a13d4323b2ebca05644d9124",
             display_player_name: "TYLIO",
-            avatar_image: avatarPersonne
+            avatar_image: tylioImage
         },
         {
             epic_id: "48a10d6404c649198c8cf382f12253bc",
             display_player_name: "VOXE",
-            avatar_image: avatarPersonne
+            avatar_image: voxeImage
         },
         {
             epic_id: "84867c4ef9674c9b838b0c9c815a58fc",
             display_player_name: "BAXO",
-            avatar_image: avatarPersonne
+            avatar_image: baxoImage
         }
     ];
 
