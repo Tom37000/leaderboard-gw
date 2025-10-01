@@ -377,7 +377,6 @@ function LeaderboardGamewardAllWls() {
 
     const sortedPlayers = playersData
         .map((playerData, index) => ({ ...playerData, config: playerConfigs[index], index }))
-        .filter(player => player.rank !== '-')
         .sort((a, b) => {
             if (a.rank === '-') return 1;
             if (b.rank === '-') return -1;
@@ -398,7 +397,7 @@ function LeaderboardGamewardAllWls() {
                 </div>
             )}
             
-            {!error && sortedPlayers.length > 0 && (
+            {!error && (
                 <div className='summary-content'>
                     <div className='summary-header'>
                         <div className='header-rank'>Top</div>
@@ -429,12 +428,6 @@ function LeaderboardGamewardAllWls() {
                             );
                         })}
                     </div>
-                </div>
-            )}
-            
-            {!error && sortedPlayers.length === 0 && (
-                <div className='summary-error'>
-                    Aucune donnée disponible
                 </div>
             )}
         </div>
