@@ -506,7 +506,9 @@ function LeaderboardGameward() {
                                 </div>
                                 
                                 <div className='stat_column'>
-                                    <div className='stat_label'>POINTS</div>
+                                    <div className='stat_label'>
+                                        {playerData && Number(playerData.points) >= 2 ? 'POINTS' : 'POINT'}
+                                    </div>
                                     <div className='stat_value'>
                                         {playerData ? playerData.points : '-'}
                                     </div>
