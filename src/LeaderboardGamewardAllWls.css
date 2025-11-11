@@ -150,6 +150,7 @@
   width: 50px;
   text-align: center;
   flex-shrink: 0;
+  order: 1;
 }
 
 .summary-player-simple.rank-1 .player-rank-simple {
@@ -172,6 +173,7 @@
   object-fit: cover;
   flex-shrink: 0;
   margin-left: 10px;
+  order: 2; 
 }
 
 .summary-player-simple.rank-1 .summary-avatar-simple {
@@ -193,9 +195,11 @@
   width: 150px;
   text-align: left;
   margin-left: 15px;
+  flex: 1; 
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  order: 2;
 }
 
 .player-points-simple {
@@ -205,8 +209,9 @@
   text-transform: uppercase;
   width: 80px;
   text-align: right;
-  margin-left: auto;
+  margin-left: auto; 
   flex-shrink: 0;
+  order: 4;
 }
 
 .summary-loading {

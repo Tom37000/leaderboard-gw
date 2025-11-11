@@ -110,19 +110,38 @@ function PlayerGameSlideshow({ sessionData, playerName, playerData }) {
     if (!currentGame) {
         return null;
     }
-    
+    const killsLabel = (currentGame.kills === 0 || currentGame.kills === 1) ? 'kill' : 'kills';
+    const bestPlacement = gameData.length ? Math.min(...gameData.map(g => {
+        const place = typeof g.placement === 'string' ? parseInt(g.placement, 10) : g.placement;
+        return isNaN(place) ? 100 : place;
+    })) : null;
     return (
         <div className={`game_display_container ${containerVisible ? 'visible' : ''}`}>
             <div className={`game_text ${fadeClass}`}>
-                Game {currentGame.gameNumber} : Top {currentGame.placement}, {currentGame.kills} kills
+                Game {currentGame.gameNumber} : Top {currentGame.placement}, {currentGame.kills} {killsLabel}
             </div>
         </div>
     );
 }
 
 function LeaderboardGameward() {
-    const leaderboard_id = new URLSearchParams(useLocation().search).get('id');
-    const leaderboard_id2 = new URLSearchParams(useLocation().search).get('id2');
+    const location = useLocation();
+    const parseIdAndTarget = (raw) => {
+        if (!raw) return { id: null, target: null };
+        const [idPart, targetPart] = String(raw).split('/');
+        const target = targetPart && /^\d+$/.test(targetPart) ? parseInt(targetPart, 10) : null;
+        return { id: idPart, target };
+    };
+
+    const rawId = new URLSearchParams(location.search).get('id');
+    const rawId2 = new URLSearchParams(location.search).get('id2');
+    const { id: leaderboardIdCore, target: targetFromId } = parseIdAndTarget(rawId);
+    const { id: leaderboardId2Core, target: targetFromId2 } = parseIdAndTarget(rawId2);
+    const pathSegments = location.pathname.split('/').filter(Boolean);
+    const lastSegment = pathSegments[pathSegments.length - 1];
+    const targetFromPath = lastSegment && /^\d+$/.test(lastSegment) ? parseInt(lastSegment, 10) : null;
+
+    const gamesTarget = targetFromId ?? targetFromId2 ?? targetFromPath ?? null;
     const navigate = useNavigate();
     const playerConfigs = [
         {
@@ -214,11 +233,11 @@ function LeaderboardGameward() {
                     
                     return await Promise.all(promises);
                 };
-                const allPagesData1 = await loadLeaderboardData(leaderboard_id);
+                const allPagesData1 = await loadLeaderboardData(leaderboardIdCore);
                 let allPagesData2 = [];
                 
-                if (leaderboard_id2) {
-                    allPagesData2 = await loadLeaderboardData(leaderboard_id2);
+                if (leaderboardId2Core) {
+                    allPagesData2 = await loadLeaderboardData(leaderboardId2Core);
                 }
                 
                 const foundPlayers = new Array(playerConfigs.length).fill(null);
@@ -253,7 +272,7 @@ function LeaderboardGameward() {
                             }
                         });
                         
-                        if (leaderboard_id2) {
+                        if (leaderboardId2Core) {
                             allPagesData2.forEach(data => {
                                 for (let team in data.teams) {
                                     const sessions = data.teams[team].sessions;
@@ -277,7 +296,7 @@ function LeaderboardGameward() {
                             });
                         }
                         if (playerData1 || playerData2) {
-                            if (leaderboard_id2) {
+                            if (leaderboardId2Core) {
                                 const data1 = playerData1 || { rank: 999, points: 0, games: 0 };
                                 const data2 = playerData2 || { rank: 999, points: 0, games: 0 };
                                 
@@ -304,7 +323,7 @@ function LeaderboardGameward() {
                         }
                     }
                 });
-                if (leaderboard_id2) {
+                if (leaderboardId2Core) {
                     const allTeamsMap = new Map();
                     allPagesData1.forEach(data => {
                         for (let teamId in data.teams) {
@@ -361,7 +380,7 @@ function LeaderboardGameward() {
                                     }
                                 }
                             });
-                            if (leaderboard_id2) {
+                            if (leaderboardId2Core) {
                                 allPagesData2.forEach(pageData => {
                                     for (let teamId in pageData.teams) {
                                         const teamData = pageData.teams[teamId];
@@ -448,7 +467,7 @@ function LeaderboardGameward() {
             }
         };
         
-        if (leaderboard_id) {
+        if (leaderboardIdCore) {
             loadPlayersData();
             const interval = setInterval(loadPlayersData, 20000);
             return () => {
@@ -460,7 +479,7 @@ function LeaderboardGameward() {
         } else {
             setError('ID du leaderboard manquant');
         }
-    }, [leaderboard_id, leaderboard_id2]);
+    }, [leaderboardIdCore, leaderboardId2Core]);
 
 
     if (error) {
@@ -478,6 +497,13 @@ function LeaderboardGameward() {
 
             {playersData.map((playerData, index) => {
                 const config = playerConfigs[index];
+                const sessionDataForPlayer = playersSessionData[index];
+                const gameSummary = sessionDataForPlayer ? extractGameData(sessionDataForPlayer) : [];
+                const bestPlacement = gameSummary.length ? Math.min(...gameSummary.map(g => {
+                    const place = typeof g.placement === 'string' ? parseInt(g.placement, 10) : g.placement;
+                    return isNaN(place) ? 100 : place;
+                })) : null;
+                const gamesCount = gameSummary.length;
                 
                 if (!config.display_player_name || config.display_player_name.trim() === "") {
                     return null;
@@ -517,12 +543,15 @@ function LeaderboardGameward() {
                                 <div className='stat_column'>
                                     <div className='stat_label'>{playerData && playerData.games > 1 ? 'GAMES' : 'GAME'}</div>
                                     <div className='stat_value'>
-                                        {playerData ? playerData.games : '-'}
+                                        <span className='games_current'>{playerData ? playerData.games : '-'}</span>
+                                        {playerData && Number(playerData.games) >= 1 && gamesTarget ? (
+                                            <span className='games_target'>/{gamesTarget}</span>
+                                        ) : null}
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        
+
                         <PlayerGameSlideshow 
                             sessionData={playersSessionData[index]}
                             playerName={playerData ? playerData.playerName : config.display_player_name}
