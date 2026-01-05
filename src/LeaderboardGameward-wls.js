@@ -481,13 +481,13 @@ function LeaderboardGameward() {
                 }
                 retryTimeoutRef.current = setTimeout(() => {
                     loadPlayersData();
-                }, 25000);
+                }, 10000);
             }
         };
 
         if (leaderboardIdCore) {
             loadPlayersData();
-            const interval = setInterval(loadPlayersData, 25000);
+            const interval = setInterval(loadPlayersData, 10000);
             return () => {
                 clearInterval(interval);
                 if (retryTimeoutRef.current) {
