@@ -156,6 +156,7 @@
   transform: translateY(-10px);
   opacity: 0;
   grid-column: 2;
+  text-align: center;
 }
 
 .game_display_container_wls.visible {
