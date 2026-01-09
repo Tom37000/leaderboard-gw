@@ -1,4 +1,4 @@
-.gameward_overlay {
+.gameward_overlay_wls {
   position: fixed;
   top: 50%;
   left: 50%;
@@ -23,8 +23,15 @@
   justify-content: center;
 }
 
-.player_stats_container {
-  background: #2a274e;
+.player_stats_container_wls {
+  background: linear-gradient(135deg,
+      #120a2b 0%,
+      #1b1246 25%,
+      #2a1f6b 45%,
+      #3b2b8f 65%,
+      #5a3fbf 85%,
+      #8b4fd6 100%);
+
   border-radius: 15px;
   padding: 0;
   margin: 0 0 25px 0;
@@ -40,59 +47,54 @@
   will-change: box-shadow;
 }
 
-.player_stats_container:nth-child(1) {
+.player_stats_container_wls:nth-child(1) {
   grid-column: 1;
   grid-row: 1;
 }
 
-.player_stats_container:nth-child(2) {
+.player_stats_container_wls:nth-child(2) {
   grid-column: 2;
   grid-row: 1;
 }
 
-.player_stats_container:nth-child(3) {
+.player_stats_container_wls:nth-child(3) {
   grid-column: 1;
   grid-row: 2;
 }
 
-.player_stats_container:nth-child(4) {
+.player_stats_container_wls:nth-child(4) {
   grid-column: 2;
   grid-row: 2;
 }
 
-.player_stats_container:nth-child(5) {
+.player_stats_container_wls:nth-child(5) {
   grid-column: 1;
   grid-row: 3;
 }
 
-.player_stats_container:nth-child(6) {
+.player_stats_container_wls:nth-child(6) {
   grid-column: 2;
   grid-row: 3;
 }
 
-.player_header {
+.player_header_wls {
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0;
   padding: 0 30px;
-  background: #2a274e;
+  background: transparent;
   border-radius: 12px 0 0 12px;
   min-width: fit-content;
   flex-shrink: 0;
-  height: 70px;
   grid-column: 1;
 }
-.player_avatar {
-  width: 55px;
-  height: 55px;
-  border-radius: 50%;
-  margin-right: 15px;
-  border: 3px solid #fbb804;
-  object-fit: cover;
+
+.player_avatar_wls {
+  display: none;
 }
 
-.player_name {
+.player_name_wls {
   font-size: 2.0em;
   font-weight: 900;
   margin: 0;
@@ -104,11 +106,11 @@
   text-align: center;
 }
 
-.player_top_section {
+.player_top_section_wls {
   display: contents;
 }
 
-.stats_display {
+.stats_display_wls {
   display: flex;
   flex-direction: row;
   padding: 0;
@@ -120,11 +122,11 @@
   grid-column: 2;
 }
 
-.stat_column {
+.stat_column_wls {
   flex: 1;
   text-align: center;
   padding: 12px 20px;
-  background: #2a274e;
+  background: transparent;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -132,7 +134,7 @@
   position: relative;
 }
 
-.stat_column::after {
+.stat_column_wls::after {
   content: '';
   position: absolute;
   right: 0;
@@ -142,11 +144,11 @@
   background-color: #fbb804;
 }
 
-.stat_column:last-child::after {
+.stat_column_wls:last-child::after {
   display: none;
 }
 
-.game_display_container {
+.game_display_container_wls {
   margin: 6px 30px 10px 0;
   max-height: 0;
   overflow: hidden;
@@ -156,13 +158,13 @@
   grid-column: 2;
 }
 
-.game_display_container.visible {
+.game_display_container_wls.visible {
   max-height: 60px;
   transform: translateY(0);
   opacity: 1;
 }
 
-.game_text {
+.game_text_wls {
   color: #fbb804;
   font-weight: 900;
   font-size: 1.1em;
@@ -173,17 +175,17 @@
   transform: scale(0.95);
 }
 
-.game_text.fade-in {
+.game_text_wls.fade-in {
   opacity: 1;
   transform: scale(1);
 }
 
-.game_text.fade-out {
+.game_text_wls.fade-out {
   opacity: 0;
   transform: scale(0.95);
 }
 
-.stat_label {
+.stat_label_wls {
   font-size: 0.85em;
   font-weight: 700;
   margin-bottom: 3px;
@@ -192,7 +194,7 @@
   letter-spacing: 1px;
 }
 
-.stat_value {
+.stat_value_wls {
   font-size: 1.6em;
   font-weight: bold;
   color: #ffffff;
@@ -211,17 +213,23 @@
   color: rgba(255, 255, 255, 0.85);
 }
 
-.error_container {
+.error_container_wls {
   text-align: center;
   padding: 40px 30px;
-  background: #504588;
+  background: linear-gradient(135deg,
+      #120a2b 0%,
+      #1b1246 25%,
+      #2a1f6b 45%,
+      #3b2b8f 65%,
+      #5a3fbf 85%,
+      #8b4fd6 100%);
   border-radius: 0 0 10px 10px;
   font-size: 1.2em;
   font-weight: 700;
   color: #ffffff;
 }
 
-.error_text {
+.error_text_wls {
   font-size: 18px;
   color: #ffffff;
   text-align: center;
@@ -250,9 +258,11 @@
   0% {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), 0 0 8px rgba(251, 184, 4, 0.18);
   }
+
   50% {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), 0 0 18px rgba(251, 184, 4, 0.45);
   }
+
   100% {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), 0 0 8px rgba(251, 184, 4, 0.18);
   }

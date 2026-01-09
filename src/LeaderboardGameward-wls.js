@@ -126,8 +126,8 @@ function PlayerGameSlideshow({ sessionData, playerName, playerData }) {
         return isNaN(place) ? 100 : place;
     })) : null;
     return (
-        <div className={`game_display_container ${containerVisible ? 'visible' : ''}`}>
-            <div className={`game_text ${fadeClass}`}>
+        <div className={`game_display_container_wls ${containerVisible ? 'visible' : ''}`}>
+            <div className={`game_text_wls ${fadeClass}`}>
                 Game {currentGame.gameNumber} : Top {currentGame.placement}, {currentGame.kills} {killsLabel}
             </div>
         </div>
@@ -502,16 +502,16 @@ function LeaderboardGameward() {
 
     if (error) {
         return (
-            <div className='gameward_overlay'>
-                <div className='error_container'>
-                    <div className='error_text'>{error}</div>
+            <div className='gameward_overlay_wls'>
+                <div className='error_container_wls'>
+                    <div className='error_text_wls'>{error}</div>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className='gameward_overlay'>
+        <div className='gameward_overlay_wls'>
 
             {playersData.map((playerData, index) => {
                 const config = playerConfigs[index];
@@ -528,39 +528,39 @@ function LeaderboardGameward() {
                 }
 
                 return (
-                    <div key={index} className='player_stats_container'>
-                        <div className='player_top_section'>
-                            <div className='player_header'>
+                    <div key={index} className='player_stats_container_wls'>
+                        <div className='player_top_section_wls'>
+                            <div className='player_header_wls'>
                                 <img
                                     src={config.avatar_image}
                                     alt="Avatar"
-                                    className='player_avatar'
+                                    className='player_avatar_wls'
                                 />
-                                <div className='player_name'>
+                                <div className='player_name_wls'>
                                     {playerData ? playerData.playerName : config.display_player_name}
                                 </div>
                             </div>
 
-                            <div className='stats_display'>
-                                <div className='stat_column'>
-                                    <div className='stat_label'>TOP</div>
-                                    <div className='stat_value'>
+                            <div className='stats_display_wls'>
+                                <div className='stat_column_wls'>
+                                    <div className='stat_label_wls'>TOP</div>
+                                    <div className='stat_value_wls'>
                                         {playerData ? formatNumber(playerData.rank) : '-'}
                                     </div>
                                 </div>
 
-                                <div className='stat_column'>
-                                    <div className='stat_label'>
+                                <div className='stat_column_wls'>
+                                    <div className='stat_label_wls'>
                                         {playerData && Number(playerData.points) >= 2 ? 'POINTS' : 'POINT'}
                                     </div>
-                                    <div className='stat_value'>
+                                    <div className='stat_value_wls'>
                                         {playerData ? formatNumber(playerData.points) : '-'}
                                     </div>
                                 </div>
 
-                                <div className='stat_column'>
-                                    <div className='stat_label'>{playerData && playerData.games > 1 ? 'GAMES' : 'GAME'}</div>
-                                    <div className='stat_value'>
+                                <div className='stat_column_wls'>
+                                    <div className='stat_label_wls'>{playerData && playerData.games > 1 ? 'GAMES' : 'GAME'}</div>
+                                    <div className='stat_value_wls'>
                                         <span className='games_current'>{playerData ? playerData.games : '-'}</span>
                                         {playerData && Number(playerData.games) >= 1 && gamesTarget ? (
                                             <span className='games_target'>/{gamesTarget}</span>
