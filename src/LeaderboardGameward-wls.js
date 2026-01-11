@@ -11,7 +11,7 @@ const formatNumber = (num) => {
     const numValue = typeof num === 'string' ? parseInt(num, 10) : num;
     if (isNaN(numValue)) return num;
     if (numValue >= 10000) {
-        return numValue.toString().replace(/(\d)(?=(\d{3})+$)/g, '$1 ');
+        return numValue.toString().replace(/(\d)(?=(\d{3})+$)/g, '$1\u2009');
     }
     return numValue.toString();
 };
@@ -133,6 +133,43 @@ function PlayerGameSlideshow({ sessionData, playerName, playerData }) {
         </div>
     );
 }
+
+const RankValue = ({ rank }) => {
+    const [animationClass, setAnimationClass] = useState('');
+    const prevRank = useRef(rank);
+
+    useEffect(() => {
+        if (rank === null || rank === undefined) return;
+        if (prevRank.current === null || prevRank.current === undefined) {
+            prevRank.current = rank;
+            return;
+        }
+
+        if (rank !== prevRank.current) {
+            if (rank < prevRank.current) {
+                // Better rank (1 is better than 2) -> Green
+                setAnimationClass('rank-gained');
+            } else {
+                // Worse rank -> Red
+                setAnimationClass('rank-lost');
+            }
+
+            prevRank.current = rank;
+
+            const timer = setTimeout(() => {
+                setAnimationClass('');
+            }, 1000);
+
+            return () => clearTimeout(timer);
+        }
+    }, [rank]);
+
+    return (
+        <div className={`stat_value_wls ${animationClass}`}>
+            {formatNumber(rank)}
+        </div>
+    );
+};
 
 function LeaderboardGameward() {
     const location = useLocation();
@@ -487,7 +524,7 @@ function LeaderboardGameward() {
 
         if (leaderboardIdCore) {
             loadPlayersData();
-            const interval = setInterval(loadPlayersData, 10000);
+            const interval = setInterval(loadPlayersData, 25000);
             return () => {
                 clearInterval(interval);
                 if (retryTimeoutRef.current) {
@@ -544,9 +581,11 @@ function LeaderboardGameward() {
                             <div className='stats_display_wls'>
                                 <div className='stat_column_wls'>
                                     <div className='stat_label_wls'>TOP</div>
-                                    <div className='stat_value_wls'>
-                                        {playerData ? formatNumber(playerData.rank) : '-'}
-                                    </div>
+                                    {playerData ? (
+                                        <RankValue rank={playerData.rank} />
+                                    ) : (
+                                        <div className='stat_value_wls'>-</div>
+                                    )}
                                 </div>
 
                                 <div className='stat_column_wls'>

@@ -200,6 +200,17 @@
   font-weight: bold;
   color: #ffffff;
   margin: 0;
+  transition: color 0.3s ease;
+}
+
+.rank-gained {
+  color: #00ff00 !important;
+  text-shadow: 0 0 10px rgba(0, 255, 0, 0.7);
+}
+
+.rank-lost {
+  color: #ff0000 !important;
+  text-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
 }
 
 .games_current {
