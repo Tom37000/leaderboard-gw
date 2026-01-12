@@ -373,7 +373,7 @@ function LeaderboardGamewardAllWls() {
                 return;
             }
             loadPlayersData();
-            const interval = setInterval(loadPlayersData, 25000);
+            const interval = setInterval(loadPlayersData, 10000);
             return () => {
                 clearInterval(interval);
                 if (retryTimeoutRef.current) {

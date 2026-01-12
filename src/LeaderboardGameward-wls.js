@@ -147,10 +147,8 @@ const RankValue = ({ rank }) => {
 
         if (rank !== prevRank.current) {
             if (rank < prevRank.current) {
-                // Better rank (1 is better than 2) -> Green
                 setAnimationClass('rank-gained');
             } else {
-                // Worse rank -> Red
                 setAnimationClass('rank-lost');
             }
 
@@ -253,7 +251,7 @@ function LeaderboardGameward() {
                             if (!response.ok) {
                                 if (response.status === 429) {
                                     const retryAfter = response.headers.get('Retry-After');
-                                    const delay = retryAfter ? parseInt(retryAfter, 10) * 1000 : 25000; // 30 secondes par défaut
+                                    const delay = retryAfter ? parseInt(retryAfter, 10) * 1000 : 25000; 
                                     console.warn(`Rate limit atteint, attente de ${delay}ms avant nouvelle tentative...`);
                                     await new Promise(resolve => setTimeout(resolve, delay));
                                     continue;
@@ -524,7 +522,7 @@ function LeaderboardGameward() {
 
         if (leaderboardIdCore) {
             loadPlayersData();
-            const interval = setInterval(loadPlayersData, 25000);
+            const interval = setInterval(loadPlayersData, 10000);
             return () => {
                 clearInterval(interval);
                 if (retryTimeoutRef.current) {
