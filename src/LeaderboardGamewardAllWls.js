@@ -53,22 +53,22 @@ function LeaderboardGamewardAllWls() {
 
     const playerConfigs = [
         {
-            wls_player_name: "Iceee",
+            ingame_id: "70a8b05d217d47a381e9137b9a0dce51",
             display_player_name: "Icee",
             avatar_image: iceeImage
         },
         {
-            wls_player_name: "Voxe",
-            display_player_name: "Voxe",
+            ingame_id: "",
+            display_player_name: "??",
             avatar_image: voxeImage
         },
         {
-            wls_player_name: "tylio7",
+            ingame_id: "d038d3b7a13d4323b2ebca05644d9124",
             display_player_name: "Tylio",
             avatar_image: tylioImage
         },
         {
-            wls_player_name: "BaxoTv",
+            ingame_id: "84867c4ef9674c9b838b0c9c815a58fc",
             display_player_name: "Baxo",
             avatar_image: baxoImage
         }
@@ -144,8 +144,18 @@ function LeaderboardGamewardAllWls() {
                     }
                 };
 
-                const loadLeaderboardData = async (leaderboardId) => {
-                    const firstData = await fetchWithRetry(`https://api.wls.gg/v5/leaderboards/${leaderboardId}?page=0`);
+                const validIngameIds = playerConfigs
+                    .filter(config => config.ingame_id && config.ingame_id.trim() !== '')
+                    .map(config => config.ingame_id);
+                const ingameIdsParam = validIngameIds.length > 0 ? `ingame_id=${validIngameIds.join(',')}` : '';
+                const loadLeaderboardData = async (leaderboardId, useFilter = true) => {
+                    const url = (useFilter && ingameIdsParam)
+                        ? `https://api.wls.gg/v5/leaderboards/${leaderboardId}?${ingameIdsParam}`
+                        : `https://api.wls.gg/v5/leaderboards/${leaderboardId}?page=0`;
+                    const firstData = await fetchWithRetry(url);
+                    if (useFilter && ingameIdsParam) {
+                        return [firstData];
+                    }
 
                     const totalPages = firstData.total_pages || 1;
 
@@ -162,8 +172,8 @@ function LeaderboardGamewardAllWls() {
                 const foundPlayers = new Array(playerConfigs.length).fill(null);
 
                 if (isCumulativeMode) {
-                    const allPagesData1 = await loadLeaderboardData(leaderboard_id);
-                    const allPagesData2 = await loadLeaderboardData(leaderboard_id2);
+                    const allPagesData1 = await loadLeaderboardData(leaderboard_id, false);
+                    const allPagesData2 = await loadLeaderboardData(leaderboard_id2, false);
 
                     const allTeamsMap = new Map();
 
@@ -273,11 +283,10 @@ function LeaderboardGamewardAllWls() {
                         }));
 
                     playerConfigs.forEach((config, index) => {
-                        if (config.wls_player_name) {
+                        if (config.ingame_id && config.ingame_id.trim() !== '') {
                             const playerTeam = globalTeamRanking.find(team =>
                                 team.members.some(member =>
-                                    member.name.toLowerCase().includes(config.wls_player_name.toLowerCase()) ||
-                                    (member.ingame_name && member.ingame_name.toLowerCase().includes(config.wls_player_name.toLowerCase()))
+                                    member.ingame_id === config.ingame_id
                                 )
                             );
 
@@ -297,28 +306,27 @@ function LeaderboardGamewardAllWls() {
                     const allPagesData = await loadLeaderboardData(leaderboard_id);
 
                     playerConfigs.forEach((config, index) => {
-                        if (config.wls_player_name) {
+                        if (config.ingame_id && config.ingame_id.trim() !== '') {
                             let playerData = null;
 
                             allPagesData.forEach(data => {
-                                data.teams.forEach(team => {
-                                    const sessions = Object.values(team.sessions);
+                                for (let team in data.teams) {
+                                    const sessions = Object.values(data.teams[team].sessions);
                                     const gamesCount = sessions.length;
-                                    const members = Object.values(team.members);
+                                    const members = Object.values(data.teams[team].members);
 
                                     const playerInTeam = members.find(member =>
-                                        member.name.toLowerCase().includes(config.wls_player_name.toLowerCase()) ||
-                                        (member.ingame_name && member.ingame_name.toLowerCase().includes(config.wls_player_name.toLowerCase()))
+                                        member.ingame_id === config.ingame_id
                                     );
 
                                     if (playerInTeam && !playerData) {
                                         playerData = {
-                                            rank: team.place,
-                                            points: team.points,
+                                            rank: data.teams[team].place,
+                                            points: data.teams[team].points,
                                             games: gamesCount
                                         };
                                     }
-                                });
+                                }
                             });
 
                             if (playerData) {

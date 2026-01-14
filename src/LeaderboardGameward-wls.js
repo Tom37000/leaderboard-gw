@@ -190,32 +190,22 @@ function LeaderboardGameward() {
     const navigate = useNavigate();
     const playerConfigs = [
         {
-            wls_player_name: "Iceee",
+            ingame_id: "70a8b05d217d47a381e9137b9a0dce51",
             display_player_name: "Icee",
             avatar_image: iceeImage
         },
         {
-            wls_player_name: "",
-            display_player_name: "",
-            avatar_image: avatarPersonne
-        },
-        {
-            wls_player_name: "",
-            display_player_name: "",
-            avatar_image: avatarPersonne
-        },
-        {
-            wls_player_name: "Voxe",
-            display_player_name: "Voxe",
+            ingame_id: "",
+            display_player_name: "??",
             avatar_image: voxeImage
         },
         {
-            wls_player_name: "tylio7",
+            ingame_id: "d038d3b7a13d4323b2ebca05644d9124",
             display_player_name: "Tylio",
             avatar_image: tylioImage
         },
         {
-            wls_player_name: "BaxoTv",
+            ingame_id: "84867c4ef9674c9b838b0c9c815a58fc",
             display_player_name: "Baxo",
             avatar_image: avatarPersonne
         }
@@ -251,7 +241,7 @@ function LeaderboardGameward() {
                             if (!response.ok) {
                                 if (response.status === 429) {
                                     const retryAfter = response.headers.get('Retry-After');
-                                    const delay = retryAfter ? parseInt(retryAfter, 10) * 1000 : 25000; 
+                                    const delay = retryAfter ? parseInt(retryAfter, 10) * 1000 : 25000;
                                     console.warn(`Rate limit atteint, attente de ${delay}ms avant nouvelle tentative...`);
                                     await new Promise(resolve => setTimeout(resolve, delay));
                                     continue;
@@ -272,8 +262,19 @@ function LeaderboardGameward() {
                     }
                 };
 
-                const loadLeaderboardData = async (leaderboardId) => {
-                    const firstData = await fetchWithRetry(`https://api.wls.gg/v5/leaderboards/${leaderboardId}?page=0`);
+                const validIngameIds = playerConfigs
+                    .filter(config => config.ingame_id && config.ingame_id.trim() !== '')
+                    .map(config => config.ingame_id);
+                const ingameIdsParam = validIngameIds.length > 0 ? `ingame_id=${validIngameIds.join(',')}` : '';
+                const loadLeaderboardData = async (leaderboardId, useFilter = true) => {
+                    const url = (useFilter && ingameIdsParam)
+                        ? `https://api.wls.gg/v5/leaderboards/${leaderboardId}?${ingameIdsParam}`
+                        : `https://api.wls.gg/v5/leaderboards/${leaderboardId}?page=0`;
+                    const firstData = await fetchWithRetry(url);
+
+                    if (useFilter && ingameIdsParam) {
+                        return [firstData];
+                    }
 
                     const totalPages = firstData.total_pages || 1;
 
@@ -286,18 +287,20 @@ function LeaderboardGameward() {
 
                     return results;
                 };
-                const allPagesData1 = await loadLeaderboardData(leaderboardIdCore);
+
+                const isCumulativeMode = !!leaderboardId2Core;
+                const allPagesData1 = await loadLeaderboardData(leaderboardIdCore, !isCumulativeMode);
                 let allPagesData2 = [];
 
                 if (leaderboardId2Core) {
-                    allPagesData2 = await loadLeaderboardData(leaderboardId2Core);
+                    allPagesData2 = await loadLeaderboardData(leaderboardId2Core, false);
                 }
 
                 const foundPlayers = new Array(playerConfigs.length).fill(null);
                 const foundPlayersSessions = new Array(playerConfigs.length).fill(null);
 
                 playerConfigs.forEach((config, index) => {
-                    if (config.wls_player_name) {
+                    if (config.ingame_id && config.ingame_id.trim() !== '') {
                         let playerData1 = null;
                         let playerData2 = null;
                         let sessions1 = null;
@@ -310,8 +313,7 @@ function LeaderboardGameward() {
                                 const members = Object.values(data.teams[team].members);
 
                                 const playerInTeam = members.find(member =>
-                                    member.name.toLowerCase().includes(config.wls_player_name.toLowerCase()) ||
-                                    (member.ingame_name && member.ingame_name.toLowerCase().includes(config.wls_player_name.toLowerCase()))
+                                    member.ingame_id === config.ingame_id
                                 );
 
                                 if (playerInTeam && !playerData1) {
@@ -333,8 +335,7 @@ function LeaderboardGameward() {
                                     const members = Object.values(data.teams[team].members);
 
                                     const playerInTeam = members.find(member =>
-                                        member.name.toLowerCase().includes(config.wls_player_name.toLowerCase()) ||
-                                        (member.ingame_name && member.ingame_name.toLowerCase().includes(config.wls_player_name.toLowerCase()))
+                                        member.ingame_id === config.ingame_id
                                     );
 
                                     if (playerInTeam && !playerData2) {
@@ -485,8 +486,7 @@ function LeaderboardGameward() {
                             const config = playerConfigs[index];
                             const playerTeam = globalTeamRanking.find(team =>
                                 team.members.some(member =>
-                                    member.name.toLowerCase().includes(config.wls_player_name.toLowerCase()) ||
-                                    (member.ingame_name && member.ingame_name.toLowerCase().includes(config.wls_player_name.toLowerCase()))
+                                    member.ingame_id === config.ingame_id
                                 )
                             );
 
