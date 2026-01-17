@@ -4,7 +4,14 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import iceeImage from './icee.png';
 import tylioImage from './tylio.png';
 import voxeImage from './voxe.png';
+import BaxoImage from './baxo.png';
 import avatarPersonne from './avatar-personne.png';
+import IconGwWin from './IconGwWin.PNG';
+import IconIcee from './IconIcee.png';
+import IconBaxo from './IconBaxo.png';
+import IconNociff from './IconNociff.png';
+import IconTylio from './IconTylio.png';
+import IconVoxe from './IconVoxe.png';
 
 const formatNumber = (num) => {
     if (num === null || num === undefined || num === '-') return num;
@@ -192,32 +199,47 @@ function LeaderboardGameward() {
         {
             ingame_id: "70a8b05d217d47a381e9137b9a0dce51",
             display_player_name: "Icee",
-            avatar_image: iceeImage
+            avatar_image: iceeImage,
+            icon: IconIcee
         },
         {
-            ingame_id: "",
-            display_player_name: "??",
-            avatar_image: voxeImage
+            ingame_id: "48a10d6404c649198c8cf382f12253bc",
+            display_player_name: "Voxe",
+            avatar_image: voxeImage,
+            icon: IconVoxe
         },
         {
             ingame_id: "d038d3b7a13d4323b2ebca05644d9124",
             display_player_name: "Tylio",
-            avatar_image: tylioImage
+            avatar_image: tylioImage,
+            icon: IconTylio
         },
         {
             ingame_id: "84867c4ef9674c9b838b0c9c815a58fc",
             display_player_name: "Baxo",
-            avatar_image: avatarPersonne
+            avatar_image: BaxoImage,
+            icon: IconBaxo
+        },
+        {
+            ingame_id: "e8e6c5346fe646ba8fa5dc37002eb22d",
+            display_player_name: "NociFf",
+            avatar_image: avatarPersonne,
+            icon: IconNociff
         }
     ];
 
     const [playersData, setPlayersData] = useState(new Array(playerConfigs.length).fill(null));
     const [playersSessionData, setPlayersSessionData] = useState(new Array(playerConfigs.length).fill(null));
+    const [needsEncouragement, setNeedsEncouragement] = useState(new Array(playerConfigs.length).fill(false));
+    const [encouragementIntro, setEncouragementIntro] = useState({});
     const [error, setError] = useState(null);
     const errorCountRef = useRef(0);
     const lastSuccessRef = useRef(Date.now());
     const lastValidDataRef = useRef({ players: new Array(playerConfigs.length).fill(null), sessions: new Array(playerConfigs.length).fill(null) });
     const retryTimeoutRef = useRef(null);
+    const lastGamesCountRef = useRef(new Array(playerConfigs.length).fill(null));
+    const prevNeedsEncouragementRef = useRef(new Array(playerConfigs.length).fill(false));
+    const lastGamesChangeTimeRef = useRef(new Array(playerConfigs.length).fill(Date.now()));
 
     useEffect(() => {
         const loadPlayersData = async () => {
@@ -502,6 +524,42 @@ function LeaderboardGameward() {
                 lastValidDataRef.current = { players: [...foundPlayers], sessions: [...foundPlayersSessions] };
                 setPlayersData(foundPlayers);
                 setPlayersSessionData(foundPlayersSessions);
+
+                lastValidDataRef.current = { players: [...foundPlayers], sessions: [...foundPlayersSessions] };
+                setPlayersData(foundPlayers);
+                setPlayersSessionData(foundPlayersSessions);
+
+                const ENCOURAGEMENT_START = 16 * 60 * 1000;
+                const ENCOURAGEMENT_END = 30 * 60 * 1000;
+                const now = Date.now();
+                const newEncouragementState = foundPlayers.map((player, index) => {
+                    if (!player) return false;
+
+                    const currentGames = player.games;
+                    const previousGames = lastGamesCountRef.current[index];
+
+                    if (previousGames !== null && currentGames !== previousGames) {
+                        lastGamesChangeTimeRef.current[index] = now;
+                        lastGamesCountRef.current[index] = currentGames;
+                        return false;
+                    }
+
+                    if (previousGames === null) {
+                        lastGamesCountRef.current[index] = currentGames;
+                        lastGamesChangeTimeRef.current[index] = now;
+                        return false;
+                    }
+
+                    if (gamesTarget && currentGames >= gamesTarget) {
+                        return false;
+                    }
+
+                    const timeSinceLastChange = now - lastGamesChangeTimeRef.current[index];
+                    return timeSinceLastChange >= ENCOURAGEMENT_START && timeSinceLastChange < ENCOURAGEMENT_END;
+                });
+
+                setNeedsEncouragement(newEncouragementState);
+
                 setError(null);
                 errorCountRef.current = 0;
                 lastSuccessRef.current = Date.now();
@@ -532,7 +590,19 @@ function LeaderboardGameward() {
         } else {
             setError('ID du leaderboard manquant');
         }
-    }, [leaderboardIdCore, leaderboardId2Core]);
+    }, [leaderboardIdCore, leaderboardId2Core, gamesTarget]);
+
+    useEffect(() => {
+        needsEncouragement.forEach((needs, index) => {
+            if (needs && !prevNeedsEncouragementRef.current[index]) {
+                setEncouragementIntro(prev => ({ ...prev, [index]: true }));
+                setTimeout(() => {
+                    setEncouragementIntro(prev => ({ ...prev, [index]: false }));
+                }, 4000);
+            }
+        });
+        prevNeedsEncouragementRef.current = needsEncouragement;
+    }, [needsEncouragement]);
 
 
     if (error) {
@@ -563,7 +633,7 @@ function LeaderboardGameward() {
                 }
 
                 return (
-                    <div key={index} className='player_stats_container_wls'>
+                    <div key={index} className={`player_stats_container_wls ${needsEncouragement[index] ? 'needs_encouragement' : ''}`}>
                         <div className='player_top_section_wls'>
                             <div className='player_header_wls'>
                                 <img
@@ -571,47 +641,68 @@ function LeaderboardGameward() {
                                     alt="Avatar"
                                     className='player_avatar_wls'
                                 />
-                                <div className='player_name_wls'>
-                                    {playerData ? playerData.playerName : config.display_player_name}
+                                <div className='player_name_container_wls'>
+                                    <div className='player_name_wls'>
+                                        {playerData ? playerData.playerName : config.display_player_name}
+                                    </div>
+                                    {(needsEncouragement[index] && !encouragementIntro[index]) && (
+                                        <div className='encouragement_message_wls'>
+                                            <img src={IconGwWin} alt="GW" className='encouragement_icon_wls' />
+                                            <span>ALLEZ {config.display_player_name.toUpperCase()}</span>
+                                            <img src={config.icon} alt="Ice" className='encouragement_icon_wls' />
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
                             <div className='stats_display_wls'>
-                                <div className='stat_column_wls'>
-                                    <div className='stat_label_wls'>TOP</div>
-                                    {playerData ? (
-                                        <RankValue rank={playerData.rank} />
-                                    ) : (
-                                        <div className='stat_value_wls'>-</div>
-                                    )}
-                                </div>
+                                {encouragementIntro[index] ? (
+                                    <div className='intro_animation_wls'>
+                                        <img src={IconGwWin} alt="GW" />
+                                        <span>ALLEZ {config.display_player_name}</span>
+                                        <img src={config.icon} alt="Icon" />
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div className='stat_column_wls'>
+                                            <div className='stat_label_wls'>TOP</div>
+                                            {playerData ? (
+                                                <RankValue rank={playerData.rank} />
+                                            ) : (
+                                                <div className='stat_value_wls'>-</div>
+                                            )}
+                                        </div>
 
-                                <div className='stat_column_wls'>
-                                    <div className='stat_label_wls'>
-                                        {playerData && Number(playerData.points) >= 2 ? 'POINTS' : 'POINT'}
-                                    </div>
-                                    <div className='stat_value_wls'>
-                                        {playerData ? formatNumber(playerData.points) : '-'}
-                                    </div>
-                                </div>
+                                        <div className='stat_column_wls'>
+                                            <div className='stat_label_wls'>
+                                                {playerData && Number(playerData.points) >= 2 ? 'POINTS' : 'POINT'}
+                                            </div>
+                                            <div className='stat_value_wls'>
+                                                {playerData ? formatNumber(playerData.points) : '-'}
+                                            </div>
+                                        </div>
 
-                                <div className='stat_column_wls'>
-                                    <div className='stat_label_wls'>{playerData && playerData.games > 1 ? 'GAMES' : 'GAME'}</div>
-                                    <div className='stat_value_wls'>
-                                        <span className='games_current'>{playerData ? playerData.games : '-'}</span>
-                                        {playerData && Number(playerData.games) >= 1 && gamesTarget ? (
-                                            <span className='games_target'>/{gamesTarget}</span>
-                                        ) : null}
-                                    </div>
-                                </div>
+                                        <div className='stat_column_wls'>
+                                            <div className='stat_label_wls'>{playerData && playerData.games > 1 ? 'GAMES' : 'GAME'}</div>
+                                            <div className='stat_value_wls'>
+                                                <span className='games_current'>{playerData ? playerData.games : '-'}</span>
+                                                {playerData && Number(playerData.games) >= 1 && gamesTarget ? (
+                                                    <span className='games_target'>/{gamesTarget}</span>
+                                                ) : null}
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         </div>
 
-                        <PlayerGameSlideshow
-                            sessionData={playersSessionData[index]}
-                            playerName={playerData ? playerData.playerName : config.display_player_name}
-                            playerData={playerData}
-                        />
+                        {!(needsEncouragement[index]) && (
+                            <PlayerGameSlideshow
+                                sessionData={playersSessionData[index]}
+                                playerName={playerData ? playerData.playerName : config.display_player_name}
+                                playerData={playerData}
+                            />
+                        )}
                     </div>
                 );
             })}

@@ -40,7 +40,7 @@
   grid-template-columns: auto 1fr;
   grid-auto-rows: max-content;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), 0 0 10px rgba(251, 184, 4, 0.20);
-  width: fit-content;
+  width: 580px;
   overflow: hidden;
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   animation: yellowBorderPulse 3.2s ease-in-out infinite;
@@ -329,4 +329,201 @@
   color: #666;
   font-style: italic;
   padding: 4px;
+}
+
+.player_stats_container_wls.needs_encouragement {
+  animation: encouragementPop 0.6s ease-out, encouragementGlow 2s ease-in-out infinite;
+  border-color: #e94b65;
+  position: relative;
+}
+
+.player_stats_container_wls.needs_encouragement::before {
+  content: '🔥 EN GAME !';
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #e94b65 0%, #c73a52 100%);
+  color: #fff;
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-size: 0.85em;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  animation: badgeBounce 1s ease-in-out infinite;
+  box-shadow: 0 2px 10px rgba(233, 75, 101, 0.5);
+  z-index: 10;
+}
+
+@keyframes encouragementPulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+@keyframes encouragementGlow {
+
+  0%,
+  100% {
+    border-color: #e94b65;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), 0 0 5px rgba(233, 75, 101, 0.3);
+  }
+
+  50% {
+    border-color: #e94b65;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), 0 0 15px rgba(233, 75, 101, 0.7);
+  }
+}
+
+@keyframes encouragementPulseLight {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.008);
+  }
+}
+
+@keyframes badgeBounce {
+
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  50% {
+    transform: translateX(-50%) translateY(-5px);
+  }
+}
+
+.player_name_container_wls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.needs_encouragement .player_name_container_wls {
+  margin-top: -14px;
+}
+
+.encouragement_message_wls {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin-top: -2px;
+  padding: 2px 4px;
+  border-radius: 10px;
+  font-size: 0.5em;
+  font-weight: 900;
+  color: #e94b65;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  text-shadow: none;
+  animation: slideDownEncouragement 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.needs_encouragement .player_name_wls {
+  color: #e94b65;
+}
+
+.needs_encouragement .stat_column_wls:not(:last-child)::after {
+  background-color: #e94b65;
+}
+
+.encouragement_icon_wls {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
+
+@keyframes encouragementTextPulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes encouragementPop {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+
+  70% {
+    transform: scale(0.98);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.intro_animation_wls {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 1.2em;
+  font-weight: 900;
+  color: #e94b65;
+  text-transform: uppercase;
+  animation: slideInEncouragement 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.intro_animation_wls img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
+@keyframes slideInEncouragement {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDownEncouragement {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 }

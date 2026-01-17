@@ -4,8 +4,9 @@ import { useLocation } from 'react-router-dom';
 import iceeImage from './icee.png';
 import tylioImage from './tylio.png';
 import voxeImage from './voxe.png';
-import baxoImage from './baxo.png';
+import BaxoImage from './baxo.png';
 import avatarPersonne from './avatar-personne.png';
+import IconNociff from './IconNociff.png';
 
 const formatNumber = (num) => {
     if (num === null || num === undefined || num === '-') return num;
@@ -58,8 +59,8 @@ function LeaderboardGamewardAllWls() {
             avatar_image: iceeImage
         },
         {
-            ingame_id: "",
-            display_player_name: "??",
+            ingame_id: "48a10d6404c649198c8cf382f12253bc",
+            display_player_name: "Voxe",
             avatar_image: voxeImage
         },
         {
@@ -70,7 +71,12 @@ function LeaderboardGamewardAllWls() {
         {
             ingame_id: "84867c4ef9674c9b838b0c9c815a58fc",
             display_player_name: "Baxo",
-            avatar_image: baxoImage
+            avatar_image: BaxoImage
+        },
+        {
+            ingame_id: "e8e6c5346fe646ba8fa5dc37002eb22d",
+            display_player_name: "Nociff",
+            avatar_image: IconNociff
         }
     ];
 

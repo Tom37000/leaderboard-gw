@@ -60,7 +60,6 @@
   justify-content: space-between;
   padding: 18px 25px;
   background: linear-gradient(135deg, #120a2b 0%, #1b1246 100%);
-  border-bottom: 2px solid rgba(251, 184, 4, 0.3);
   gap: 15px;
   position: relative;
 }
@@ -72,7 +71,6 @@
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, #fbb804, transparent);
 }
 
 .header-rank {
@@ -96,7 +94,7 @@
   text-transform: uppercase;
   flex: 1;
   text-align: left;
-  margin-left: -40px;
+  margin-left: -30px;
 }
 
 .header-points {
@@ -171,13 +169,13 @@
 }
 
 .summary-avatar-simple {
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   border: 2px solid #ffd700;
   object-fit: cover;
   flex-shrink: 0;
-  margin-left: 10px;
+  margin-left: 25px;
   order: 2;
 }
 
@@ -199,12 +197,13 @@
   color: #ffffff;
   width: 150px;
   text-align: left;
-  margin-left: 15px;
+  margin-left: 10px;
   flex: 1;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   order: 2;
+  text-transform: uppercase;
 }
 
 .player-points-simple {
