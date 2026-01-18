@@ -685,7 +685,7 @@ function LeaderboardGameward() {
                             </div>
 
                             <div className='stats_display_wls'>
-                                {(encouragementIntro[index] || showCyclicEncouragement) ? (
+                                {(encouragementIntro[index] || (needsEncouragement[index] && showCyclicEncouragement)) ? (
                                     <div className='intro_animation_wls'>
                                         <img src={IconGwWin} alt="GW" />
                                         <span>ALLEZ {config.display_player_name}</span>
