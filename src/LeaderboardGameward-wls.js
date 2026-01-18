@@ -185,8 +185,22 @@ function LeaderboardGameward() {
         return { id: idPart, target };
     };
 
-    const rawId = new URLSearchParams(location.search).get('id');
-    const rawId2 = new URLSearchParams(location.search).get('id2');
+    const searchParams = new URLSearchParams(location.search);
+    const rawId = searchParams.get('id');
+    const rawId2 = searchParams.get('id2');
+
+    let refreshInterval = 10000;
+    const explicitRefresh = searchParams.get('refresh') || searchParams.get('duration');
+    if (explicitRefresh && /^\d+$/.test(explicitRefresh)) {
+        refreshInterval = parseInt(explicitRefresh, 10) * 1000;
+    } else {
+        for (const key of searchParams.keys()) {
+            if (/^\d+$/.test(key) && searchParams.get(key) === '') {
+                refreshInterval = parseInt(key, 10) * 1000;
+                break;
+            }
+        }
+    }
     const { id: leaderboardIdCore, target: targetFromId } = parseIdAndTarget(rawId);
     const { id: leaderboardId2Core, target: targetFromId2 } = parseIdAndTarget(rawId2);
     const pathSegments = location.pathname.split('/').filter(Boolean);
@@ -232,6 +246,7 @@ function LeaderboardGameward() {
     const [playersSessionData, setPlayersSessionData] = useState(new Array(playerConfigs.length).fill(null));
     const [needsEncouragement, setNeedsEncouragement] = useState(new Array(playerConfigs.length).fill(false));
     const [encouragementIntro, setEncouragementIntro] = useState({});
+    const [showCyclicEncouragement, setShowCyclicEncouragement] = useState(false);
     const [error, setError] = useState(null);
     const errorCountRef = useRef(0);
     const lastSuccessRef = useRef(Date.now());
@@ -574,13 +589,13 @@ function LeaderboardGameward() {
                 }
                 retryTimeoutRef.current = setTimeout(() => {
                     loadPlayersData();
-                }, 10000);
+                }, refreshInterval);
             }
         };
 
         if (leaderboardIdCore) {
             loadPlayersData();
-            const interval = setInterval(loadPlayersData, 10000);
+            const interval = setInterval(loadPlayersData, refreshInterval);
             return () => {
                 clearInterval(interval);
                 if (retryTimeoutRef.current) {
@@ -590,7 +605,7 @@ function LeaderboardGameward() {
         } else {
             setError('ID du leaderboard manquant');
         }
-    }, [leaderboardIdCore, leaderboardId2Core, gamesTarget]);
+    }, [leaderboardIdCore, leaderboardId2Core, gamesTarget, refreshInterval]);
 
     useEffect(() => {
         needsEncouragement.forEach((needs, index) => {
@@ -598,11 +613,25 @@ function LeaderboardGameward() {
                 setEncouragementIntro(prev => ({ ...prev, [index]: true }));
                 setTimeout(() => {
                     setEncouragementIntro(prev => ({ ...prev, [index]: false }));
-                }, 4000);
+                }, 7000);
             }
         });
         prevNeedsEncouragementRef.current = needsEncouragement;
     }, [needsEncouragement]);
+
+    useEffect(() => {
+        const cycleDuration = 60 * 1000;
+        const displayDuration = 7000;
+
+        const cycleInterval = setInterval(() => {
+            setShowCyclicEncouragement(true);
+            setTimeout(() => {
+                setShowCyclicEncouragement(false);
+            }, displayDuration);
+        }, cycleDuration);
+
+        return () => clearInterval(cycleInterval);
+    }, []);
 
 
     if (error) {
@@ -656,7 +685,7 @@ function LeaderboardGameward() {
                             </div>
 
                             <div className='stats_display_wls'>
-                                {encouragementIntro[index] ? (
+                                {(encouragementIntro[index] || showCyclicEncouragement) ? (
                                     <div className='intro_animation_wls'>
                                         <img src={IconGwWin} alt="GW" />
                                         <span>ALLEZ {config.display_player_name}</span>
