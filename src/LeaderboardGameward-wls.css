@@ -414,10 +414,6 @@
   position: relative;
 }
 
-.needs_encouragement .player_name_container_wls {
-  margin-top: -14px;
-}
-
 .encouragement_message_wls {
   position: absolute;
   top: 100%;

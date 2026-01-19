@@ -178,6 +178,7 @@ const RankValue = ({ rank }) => {
 
 function LeaderboardGameward() {
     const location = useLocation();
+
     const parseIdAndTarget = (raw) => {
         if (!raw) return { id: null, target: null };
         const [idPart, targetPart] = String(raw).split('/');
@@ -603,7 +604,7 @@ function LeaderboardGameward() {
                 }
             };
         } else {
-            setError('ID du leaderboard manquant');
+            setError('Overlay');
         }
     }, [leaderboardIdCore, leaderboardId2Core, gamesTarget, refreshInterval]);
 
@@ -613,7 +614,7 @@ function LeaderboardGameward() {
                 setEncouragementIntro(prev => ({ ...prev, [index]: true }));
                 setTimeout(() => {
                     setEncouragementIntro(prev => ({ ...prev, [index]: false }));
-                }, 7000);
+                }, 8000);
             }
         });
         prevNeedsEncouragementRef.current = needsEncouragement;
@@ -621,7 +622,7 @@ function LeaderboardGameward() {
 
     useEffect(() => {
         const cycleDuration = 60 * 1000;
-        const displayDuration = 7000;
+        const displayDuration = 8000;
 
         const cycleInterval = setInterval(() => {
             setShowCyclicEncouragement(true);
@@ -674,13 +675,6 @@ function LeaderboardGameward() {
                                     <div className='player_name_wls'>
                                         {playerData ? playerData.playerName : config.display_player_name}
                                     </div>
-                                    {(needsEncouragement[index] && !encouragementIntro[index]) && (
-                                        <div className='encouragement_message_wls'>
-                                            <img src={IconGwWin} alt="GW" className='encouragement_icon_wls' />
-                                            <span>ALLEZ {config.display_player_name.toUpperCase()}</span>
-                                            <img src={config.icon} alt="Ice" className='encouragement_icon_wls' />
-                                        </div>
-                                    )}
                                 </div>
                             </div>
 
