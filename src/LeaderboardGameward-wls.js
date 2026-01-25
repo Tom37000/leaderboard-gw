@@ -545,7 +545,7 @@ function LeaderboardGameward() {
                 setPlayersData(foundPlayers);
                 setPlayersSessionData(foundPlayersSessions);
 
-                const ENCOURAGEMENT_START = 16 * 60 * 1000;
+                const ENCOURAGEMENT_START = 19 * 60 * 1000;
                 const ENCOURAGEMENT_END = 30 * 60 * 1000;
                 const now = Date.now();
                 const newEncouragementState = foundPlayers.map((player, index) => {
