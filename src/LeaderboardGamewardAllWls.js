@@ -6,7 +6,8 @@ import tylioImage from './tylio.png';
 import voxeImage from './voxe.png';
 import BaxoImage from './baxo.png';
 import avatarPersonne from './avatar-personne.png';
-import IconNociff from './IconNociff.png';
+import IconNociff from './Nociff.png';
+
 
 const formatNumber = (num) => {
     if (num === null || num === undefined || num === '-') return num;
@@ -77,6 +78,11 @@ function LeaderboardGamewardAllWls() {
             ingame_id: "e8e6c5346fe646ba8fa5dc37002eb22d",
             display_player_name: "Nociff",
             avatar_image: IconNociff
+        },
+        {
+            ingame_id: "",
+            display_player_name: "",
+            avatar_image: avatarPersonne
         }
     ];
 
@@ -409,6 +415,7 @@ function LeaderboardGamewardAllWls() {
 
     const sortedPlayers = playersData
         .map((playerData, index) => ({ ...playerData, config: playerConfigs[index], index }))
+        .filter(player => player.config.display_player_name && player.config.display_player_name.trim() !== '')
         .sort((a, b) => {
             if (a.rank === '-') return 1;
             if (b.rank === '-') return -1;

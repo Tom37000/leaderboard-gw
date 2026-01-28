@@ -1,0 +1,90 @@
+.gameward_overlay_v2 {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 1880px;
+  height: auto;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 20px;
+  font-family: 'Roboto', sans-serif;
+  color: #ffffff;
+  z-index: 1000;
+  overflow: visible;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto auto;
+  gap: 15px 20px;
+  align-items: center;
+  justify-items: center;
+}
+
+.player_card_v2 {
+  display: flex;
+  align-items: flex-end;
+  overflow: visible;
+  position: relative;
+  background: transparent;
+}
+
+.player_card_v2:nth-child(1) {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.player_card_v2:nth-child(2) {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.player_card_v2:nth-child(3) {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.player_card_v2:nth-child(4) {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.player_card_v2:nth-child(5) {
+  grid-column: 1;
+  grid-row: 3;
+}
+
+.player_card_v2:nth-child(6) {
+  grid-column: 2;
+  grid-row: 3;
+}
+
+.player_canvas_v2 {
+  height: auto;
+  max-height: 320px;
+  width: auto;
+  max-width: 920px;
+  display: block;
+}
+
+.error_container_v2 {
+  text-align: center;
+  padding: 40px 30px;
+  background: linear-gradient(135deg,
+      #120a2b 0%,
+      #1b1246 25%,
+      #2a1f6b 45%,
+      #3b2b8f 65%,
+      #5a3fbf 85%,
+      #8b4fd6 100%);
+  border-radius: 10px;
+  font-size: 1.2em;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.error_text_v2 {
+  font-size: 18px;
+  color: #ffffff;
+  text-align: center;
+}

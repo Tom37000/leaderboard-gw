@@ -1,15 +1,15 @@
-import './LeaderboardGameward-wls.css';
+import './LeaderboardGameward-wlsV2.css';
 import React, { useState, useEffect, useRef } from "react";
-import { useLocation, useNavigate } from 'react-router-dom';
-import iceeImage from './icee.png';
-import tylioImage from './tylio.png';
-import voxeImage from './voxe.png';
-import BaxoImage from './baxo.png';
-import avatarPersonne from './avatar-personne.png';
-import IconGwWin from './IconGwWin.PNG';
+import { useLocation } from 'react-router-dom';
+
+import indicateurIceeCup from './indicateur_pov_corps_icee_cup.png';
+import indicateurVoxeCup from './indicateur_pov_corps_voxe_cup.png';
+import indicateurTylioCup from './indicateur_pov_corps_tylio_cup.png';
+import indicateurBaxoCup from './indicateur_pov_corps_baxo_cup.png';
+import indicateurNociffCup from './indicateur_pov_corps_nociff_cup.png';
+
 import IconIcee from './IconIcee.png';
 import IconBaxo from './IconBaxo.png';
-import IconNociff from './Nociff.png';
 
 import IconTylio from './IconTylio.png';
 import IconVoxe from './IconVoxe.png';
@@ -22,21 +22,6 @@ const formatNumber = (num) => {
         return numValue.toString().replace(/(\d)(?=(\d{3})+$)/g, '$1\u2009');
     }
     return numValue.toString();
-};
-
-const extractGameData = (sessions) => {
-    if (!sessions || Object.keys(sessions).length === 0) return [];
-
-    return Object.values(sessions).map((session, index) => {
-        const placement = session.place || '-';
-        const kills = session.kills || 0;
-
-        return {
-            gameNumber: index + 1,
-            placement: placement,
-            kills: kills
-        };
-    });
 };
 
 const calculateTeamStats = (sessions) => {
@@ -66,118 +51,121 @@ const calculateTeamStats = (sessions) => {
     };
 };
 
-function PlayerGameSlideshow({ sessionData, playerName, playerData }) {
-    const [currentGameIndex, setCurrentGameIndex] = useState(0);
-    const [fadeClass, setFadeClass] = useState('fade-in');
-    const [isVisible, setIsVisible] = useState(false);
-    const [containerVisible, setContainerVisible] = useState(false);
-
-    const gameData = sessionData ? extractGameData(sessionData) : [];
+function PlayerCanvas({ baseImage, playerData, gamesTarget }) {
+    const canvasRef = useRef(null);
+    const imageRef = useRef(null);
+    const [imageLoaded, setImageLoaded] = useState(false);
+    const prevRankRef = useRef(null);
+    const [rankColor, setRankColor] = useState('#ffffff');
+    const rankColorTimeoutRef = useRef(null);
 
     useEffect(() => {
-        if (gameData.length >= 2) {
-            const displayDuration = gameData.length * 5000;
-            const cycleDuration = 4 * 60 * 1000;
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => {
+            imageRef.current = img;
+            setImageLoaded(true);
+        };
+        img.src = baseImage;
+    }, [baseImage]);
 
-            const visibilityInterval = setInterval(() => {
-                setCurrentGameIndex(0);
-                setContainerVisible(true);
-                setTimeout(() => {
-                    setIsVisible(true);
-                }, 300);
+    useEffect(() => {
+        if (playerData?.rank !== undefined && playerData?.rank !== null) {
+            const currentRank = playerData.rank;
+            const prevRank = prevRankRef.current;
 
-                setTimeout(() => {
-                    setIsVisible(false);
-                    setTimeout(() => {
-                        setContainerVisible(false);
-                    }, 400);
-                }, displayDuration);
-            }, cycleDuration);
+            if (prevRank !== null && prevRank !== currentRank) {
+                if (rankColorTimeoutRef.current) {
+                    clearTimeout(rankColorTimeoutRef.current);
+                }
 
-            return () => clearInterval(visibilityInterval);
+                if (currentRank < prevRank) {
+                    setRankColor('#00ff00');
+                } else if (currentRank > prevRank) {
+                    setRankColor('#ff0000');
+                }
+
+                rankColorTimeoutRef.current = setTimeout(() => {
+                    setRankColor('#ffffff');
+                }, 2000);
+            }
+
+            prevRankRef.current = currentRank;
         }
-    }, [gameData.length]);
+
+        return () => {
+            if (rankColorTimeoutRef.current) {
+                clearTimeout(rankColorTimeoutRef.current);
+            }
+        };
+    }, [playerData?.rank]);
 
     useEffect(() => {
-        setCurrentGameIndex(0);
-    }, [gameData.length]);
+        if (!imageLoaded || !canvasRef.current || !imageRef.current) return;
 
-    useEffect(() => {
-        if (gameData.length > 1 && isVisible) {
-            const interval = setInterval(() => {
-                setFadeClass('fade-out');
-                setTimeout(() => {
-                    setCurrentGameIndex(prev => {
-                        const nextIndex = (prev + 1) % gameData.length;
-                        const currentGame = gameData[nextIndex];
-                        return nextIndex;
-                    });
-                    setFadeClass('fade-in');
-                }, 300);
-            }, 5000);
-            return () => clearInterval(interval);
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        const img = imageRef.current;
+
+        canvas.width = img.width;
+        canvas.height = img.height;
+
+        ctx.drawImage(img, 0, 0);
+
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = 'bold 48px Roboto, Arial, sans-serif';
+
+        const topX = img.width * 0.597;
+        const pointsX = img.width * 0.74;
+        const gameX = img.width * 0.895;
+        const statsY = img.height * 0.82;
+
+        ctx.fillStyle = rankColor;
+        ctx.fillText(playerData?.rank ? formatNumber(playerData.rank) : '-', topX, statsY);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(playerData?.points !== undefined ? formatNumber(playerData.points) : '-', pointsX, statsY);
+
+        const gamesValue = playerData?.games !== undefined ? String(playerData.games) : '-';
+
+        if (playerData?.games >= 1 && gamesTarget) {
+            const currentText = gamesValue;
+            const slashText = '/';
+            const targetText = String(gamesTarget);
+
+            const currentWidth = ctx.measureText(currentText).width;
+            const slashWidth = ctx.measureText(slashText).width;
+            const targetWidth = ctx.measureText(targetText).width;
+            const totalWidth = currentWidth + slashWidth + targetWidth;
+
+            const startX = gameX - totalWidth / 2;
+
+            ctx.textAlign = 'left';
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(currentText, startX, statsY);
+
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+            ctx.fillText(slashText, startX + currentWidth, statsY);
+            ctx.fillText(targetText, startX + currentWidth + slashWidth, statsY);
+
+            ctx.textAlign = 'center';
+        } else {
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(gamesValue, gameX, statsY);
         }
-    }, [gameData.length, isVisible]);
 
-    if (!gameData || gameData.length < 2 || !containerVisible || !playerData) {
-        return null;
-    }
+    }, [imageLoaded, playerData, gamesTarget, rankColor]);
 
-    const currentGame = gameData[currentGameIndex];
-
-    if (!currentGame) {
-        return null;
-    }
-    const killsLabel = (currentGame.kills === 0 || currentGame.kills === 1) ? 'kill' : 'kills';
-    const bestPlacement = gameData.length ? Math.min(...gameData.map(g => {
-        const place = typeof g.placement === 'string' ? parseInt(g.placement, 10) : g.placement;
-        return isNaN(place) ? 100 : place;
-    })) : null;
     return (
-        <div className={`game_display_container_wls ${containerVisible ? 'visible' : ''}`}>
-            <div className={`game_text_wls ${fadeClass}`}>
-                Game {currentGame.gameNumber} : Top {currentGame.placement}, {currentGame.kills} {killsLabel}
-            </div>
-        </div>
+        <canvas
+            ref={canvasRef}
+            className="player_canvas_v2"
+        />
     );
 }
 
-const RankValue = ({ rank }) => {
-    const [animationClass, setAnimationClass] = useState('');
-    const prevRank = useRef(rank);
-
-    useEffect(() => {
-        if (rank === null || rank === undefined) return;
-        if (prevRank.current === null || prevRank.current === undefined) {
-            prevRank.current = rank;
-            return;
-        }
-
-        if (rank !== prevRank.current) {
-            if (rank < prevRank.current) {
-                setAnimationClass('rank-gained');
-            } else {
-                setAnimationClass('rank-lost');
-            }
-
-            prevRank.current = rank;
-
-            const timer = setTimeout(() => {
-                setAnimationClass('');
-            }, 1000);
-
-            return () => clearTimeout(timer);
-        }
-    }, [rank]);
-
-    return (
-        <div className={`stat_value_wls ${animationClass}`}>
-            {formatNumber(rank)}
-        </div>
-    );
-};
-
-function LeaderboardGameward() {
+function LeaderboardGamewardV2() {
     const location = useLocation();
 
     const parseIdAndTarget = (raw) => {
@@ -203,6 +191,7 @@ function LeaderboardGameward() {
             }
         }
     }
+
     const { id: leaderboardIdCore, target: targetFromId } = parseIdAndTarget(rawId);
     const { id: leaderboardId2Core, target: targetFromId2 } = parseIdAndTarget(rawId2);
     const pathSegments = location.pathname.split('/').filter(Boolean);
@@ -210,58 +199,52 @@ function LeaderboardGameward() {
     const targetFromPath = lastSegment && /^\d+$/.test(lastSegment) ? parseInt(lastSegment, 10) : null;
 
     const gamesTarget = targetFromId ?? targetFromId2 ?? targetFromPath ?? null;
-    const navigate = useNavigate();
+
     const playerConfigs = [
         {
             ingame_id: "70a8b05d217d47a381e9137b9a0dce51",
             display_player_name: "Icee",
-            avatar_image: iceeImage,
+            indicateur_image: indicateurIceeCup,
             icon: IconIcee
         },
         {
             ingame_id: "48a10d6404c649198c8cf382f12253bc",
             display_player_name: "Voxe",
-            avatar_image: voxeImage,
+            indicateur_image: indicateurVoxeCup,
             icon: IconVoxe
         },
         {
             ingame_id: "d038d3b7a13d4323b2ebca05644d9124",
             display_player_name: "Tylio",
-            avatar_image: tylioImage,
+            indicateur_image: indicateurTylioCup,
             icon: IconTylio
         },
         {
             ingame_id: "84867c4ef9674c9b838b0c9c815a58fc",
             display_player_name: "Baxo",
-            avatar_image: BaxoImage,
+            indicateur_image: indicateurBaxoCup,
             icon: IconBaxo
         },
         {
             ingame_id: "e8e6c5346fe646ba8fa5dc37002eb22d",
             display_player_name: "NociFf",
-            avatar_image: IconNociff,
-            icon: IconNociff
+            indicateur_image: indicateurNociffCup,
+            icon: null
         },
         {
             ingame_id: "",
-            display_player_name: "",
-            avatar_image: avatarPersonne
+            display_player_name: "PlayerEU",
+            indicateur_image: null,
+            icon: null
         }
     ];
 
     const [playersData, setPlayersData] = useState(new Array(playerConfigs.length).fill(null));
-    const [playersSessionData, setPlayersSessionData] = useState(new Array(playerConfigs.length).fill(null));
-    const [needsEncouragement, setNeedsEncouragement] = useState(new Array(playerConfigs.length).fill(false));
-    const [encouragementIntro, setEncouragementIntro] = useState({});
-    const [showCyclicEncouragement, setShowCyclicEncouragement] = useState(false);
     const [error, setError] = useState(null);
     const errorCountRef = useRef(0);
     const lastSuccessRef = useRef(Date.now());
-    const lastValidDataRef = useRef({ players: new Array(playerConfigs.length).fill(null), sessions: new Array(playerConfigs.length).fill(null) });
+    const lastValidDataRef = useRef({ players: new Array(playerConfigs.length).fill(null) });
     const retryTimeoutRef = useRef(null);
-    const lastGamesCountRef = useRef(new Array(playerConfigs.length).fill(null));
-    const prevNeedsEncouragementRef = useRef(new Array(playerConfigs.length).fill(false));
-    const lastGamesChangeTimeRef = useRef(new Array(playerConfigs.length).fill(Date.now()));
 
     useEffect(() => {
         const loadPlayersData = async () => {
@@ -310,6 +293,7 @@ function LeaderboardGameward() {
                     .filter(config => config.ingame_id && config.ingame_id.trim() !== '')
                     .map(config => config.ingame_id);
                 const ingameIdsParam = validIngameIds.length > 0 ? `ingame_id=${validIngameIds.join(',')}` : '';
+
                 const loadLeaderboardData = async (leaderboardId, useFilter = true) => {
                     const url = (useFilter && ingameIdsParam)
                         ? `https://api.wls.gg/v5/leaderboards/${leaderboardId}?${ingameIdsParam}`
@@ -341,14 +325,11 @@ function LeaderboardGameward() {
                 }
 
                 const foundPlayers = new Array(playerConfigs.length).fill(null);
-                const foundPlayersSessions = new Array(playerConfigs.length).fill(null);
 
                 playerConfigs.forEach((config, index) => {
                     if (config.ingame_id && config.ingame_id.trim() !== '') {
                         let playerData1 = null;
                         let playerData2 = null;
-                        let sessions1 = null;
-                        let sessions2 = null;
 
                         allPagesData1.forEach(data => {
                             for (let team in data.teams) {
@@ -366,7 +347,6 @@ function LeaderboardGameward() {
                                         points: data.teams[team].points,
                                         games: gamesCount
                                     };
-                                    sessions1 = sessions;
                                 }
                             }
                         });
@@ -388,11 +368,11 @@ function LeaderboardGameward() {
                                             points: data.teams[team].points,
                                             games: gamesCount
                                         };
-                                        sessions2 = sessions;
                                     }
                                 }
                             });
                         }
+
                         if (playerData1 || playerData2) {
                             if (leaderboardId2Core) {
                                 const data1 = playerData1 || { rank: 999, points: 0, games: 0 };
@@ -405,10 +385,6 @@ function LeaderboardGameward() {
                                     games: data1.games + data2.games,
                                     bestIndividualRank: Math.min(data1.rank, data2.rank)
                                 };
-                                const combinedSessions = {};
-                                if (sessions1) Object.assign(combinedSessions, sessions1);
-                                if (sessions2) Object.assign(combinedSessions, sessions2);
-                                foundPlayersSessions[index] = combinedSessions;
                             } else {
                                 foundPlayers[index] = {
                                     playerName: config.display_player_name,
@@ -416,11 +392,11 @@ function LeaderboardGameward() {
                                     points: playerData1.points,
                                     games: playerData1.games
                                 };
-                                foundPlayersSessions[index] = sessions1;
                             }
                         }
                     }
                 });
+
                 if (leaderboardId2Core) {
                     const allTeamsMap = new Map();
                     allPagesData1.forEach(data => {
@@ -440,6 +416,7 @@ function LeaderboardGameward() {
                             });
                         }
                     });
+
                     allPagesData2.forEach(data => {
                         for (let teamId in data.teams) {
                             const teamData = data.teams[teamId];
@@ -463,6 +440,7 @@ function LeaderboardGameward() {
                             }
                         }
                     });
+
                     const globalTeamRanking = Array.from(allTeamsMap.entries())
                         .map(([teamKey, data]) => {
                             const combinedSessions = {};
@@ -478,6 +456,7 @@ function LeaderboardGameward() {
                                     }
                                 }
                             });
+
                             if (leaderboardId2Core) {
                                 allPagesData2.forEach(pageData => {
                                     for (let teamId in pageData.teams) {
@@ -492,6 +471,7 @@ function LeaderboardGameward() {
                                     }
                                 });
                             }
+
                             const stats = calculateTeamStats(combinedSessions);
 
                             return {
@@ -543,53 +523,14 @@ function LeaderboardGameward() {
                     });
                 }
 
-                lastValidDataRef.current = { players: [...foundPlayers], sessions: [...foundPlayersSessions] };
+                lastValidDataRef.current = { players: [...foundPlayers] };
                 setPlayersData(foundPlayers);
-                setPlayersSessionData(foundPlayersSessions);
-
-                lastValidDataRef.current = { players: [...foundPlayers], sessions: [...foundPlayersSessions] };
-                setPlayersData(foundPlayers);
-                setPlayersSessionData(foundPlayersSessions);
-
-                const ENCOURAGEMENT_START = 19 * 60 * 1000;
-                const ENCOURAGEMENT_END = 30 * 60 * 1000;
-                const now = Date.now();
-                const newEncouragementState = foundPlayers.map((player, index) => {
-                    if (!player) return false;
-
-                    const currentGames = player.games;
-                    const previousGames = lastGamesCountRef.current[index];
-
-                    if (previousGames !== null && currentGames !== previousGames) {
-                        lastGamesChangeTimeRef.current[index] = now;
-                        lastGamesCountRef.current[index] = currentGames;
-                        return false;
-                    }
-
-                    if (previousGames === null) {
-                        lastGamesCountRef.current[index] = currentGames;
-                        lastGamesChangeTimeRef.current[index] = now;
-                        return false;
-                    }
-
-                    if (gamesTarget && currentGames >= gamesTarget) {
-                        return false;
-                    }
-
-                    const timeSinceLastChange = now - lastGamesChangeTimeRef.current[index];
-                    return timeSinceLastChange >= ENCOURAGEMENT_START && timeSinceLastChange < ENCOURAGEMENT_END;
-                });
-
-                setNeedsEncouragement(newEncouragementState);
 
                 setError(null);
                 errorCountRef.current = 0;
                 lastSuccessRef.current = Date.now();
             } catch (error) {
                 errorCountRef.current += 1;
-                if (lastValidDataRef.current.players.some(data => data !== null)) {
-                } else {
-                }
                 setError(null);
                 if (retryTimeoutRef.current) {
                     clearTimeout(retryTimeoutRef.current);
@@ -614,124 +555,35 @@ function LeaderboardGameward() {
         }
     }, [leaderboardIdCore, leaderboardId2Core, gamesTarget, refreshInterval]);
 
-    useEffect(() => {
-        needsEncouragement.forEach((needs, index) => {
-            if (needs && !prevNeedsEncouragementRef.current[index]) {
-                setEncouragementIntro(prev => ({ ...prev, [index]: true }));
-                setTimeout(() => {
-                    setEncouragementIntro(prev => ({ ...prev, [index]: false }));
-                }, 8000);
-            }
-        });
-        prevNeedsEncouragementRef.current = needsEncouragement;
-    }, [needsEncouragement]);
-
-    useEffect(() => {
-        const cycleDuration = 60 * 1000;
-        const displayDuration = 8000;
-
-        const cycleInterval = setInterval(() => {
-            setShowCyclicEncouragement(true);
-            setTimeout(() => {
-                setShowCyclicEncouragement(false);
-            }, displayDuration);
-        }, cycleDuration);
-
-        return () => clearInterval(cycleInterval);
-    }, []);
-
-
     if (error) {
         return (
-            <div className='gameward_overlay_wls'>
-                <div className='error_container_wls'>
-                    <div className='error_text_wls'>{error}</div>
+            <div className='gameward_overlay_v2'>
+                <div className='error_container_v2'>
+                    <div className='error_text_v2'>{error}</div>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className='gameward_overlay_wls'>
+        <div className='gameward_overlay_v2'>
+            {playerConfigs.map((config, index) => {
+                const playerData = playersData[index];
 
-            {playersData.map((playerData, index) => {
-                const config = playerConfigs[index];
-                const sessionDataForPlayer = playersSessionData[index];
-                const gameSummary = sessionDataForPlayer ? extractGameData(sessionDataForPlayer) : [];
-                const bestPlacement = gameSummary.length ? Math.min(...gameSummary.map(g => {
-                    const place = typeof g.placement === 'string' ? parseInt(g.placement, 10) : g.placement;
-                    return isNaN(place) ? 100 : place;
-                })) : null;
-                const gamesCount = gameSummary.length;
-
-                if (!config.display_player_name || config.display_player_name.trim() === "") {
-                    return null;
+                if (!config.indicateur_image) {
+                    return (
+                        <div key={index} className='player_card_v2'>
+                        </div>
+                    );
                 }
 
                 return (
-                    <div key={index} className={`player_stats_container_wls ${needsEncouragement[index] ? 'needs_encouragement' : ''}`}>
-                        <div className='player_top_section_wls'>
-                            <div className='player_header_wls'>
-                                <img
-                                    src={config.avatar_image}
-                                    alt="Avatar"
-                                    className='player_avatar_wls'
-                                />
-                                <div className='player_name_container_wls'>
-                                    <div className='player_name_wls'>
-                                        {playerData ? playerData.playerName : config.display_player_name}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className='stats_display_wls'>
-                                {(encouragementIntro[index] || (needsEncouragement[index] && showCyclicEncouragement)) ? (
-                                    <div className='intro_animation_wls'>
-                                        <img src={IconGwWin} alt="GW" />
-                                        <span>ALLEZ {config.display_player_name}</span>
-                                        <img src={config.icon} alt="Icon" />
-                                    </div>
-                                ) : (
-                                    <>
-                                        <div className='stat_column_wls'>
-                                            <div className='stat_label_wls'>TOP</div>
-                                            {playerData ? (
-                                                <RankValue rank={playerData.rank} />
-                                            ) : (
-                                                <div className='stat_value_wls'>-</div>
-                                            )}
-                                        </div>
-
-                                        <div className='stat_column_wls'>
-                                            <div className='stat_label_wls'>
-                                                {playerData && Number(playerData.points) >= 2 ? 'POINTS' : 'POINT'}
-                                            </div>
-                                            <div className='stat_value_wls'>
-                                                {playerData ? formatNumber(playerData.points) : '-'}
-                                            </div>
-                                        </div>
-
-                                        <div className='stat_column_wls'>
-                                            <div className='stat_label_wls'>{playerData && playerData.games > 1 ? 'GAMES' : 'GAME'}</div>
-                                            <div className='stat_value_wls'>
-                                                <span className='games_current'>{playerData ? playerData.games : '-'}</span>
-                                                {playerData && Number(playerData.games) >= 1 && gamesTarget ? (
-                                                    <span className='games_target'>/{gamesTarget}</span>
-                                                ) : null}
-                                            </div>
-                                        </div>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-
-                        {!(needsEncouragement[index]) && (
-                            <PlayerGameSlideshow
-                                sessionData={playersSessionData[index]}
-                                playerName={playerData ? playerData.playerName : config.display_player_name}
-                                playerData={playerData}
-                            />
-                        )}
+                    <div key={index} className='player_card_v2'>
+                        <PlayerCanvas
+                            baseImage={config.indicateur_image}
+                            playerData={playerData}
+                            gamesTarget={gamesTarget}
+                        />
                     </div>
                 );
             })}
@@ -739,4 +591,4 @@ function LeaderboardGameward() {
     );
 }
 
-export default LeaderboardGameward;
+export default LeaderboardGamewardV2;
