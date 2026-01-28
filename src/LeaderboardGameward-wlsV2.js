@@ -114,7 +114,7 @@ function PlayerCanvas({ baseImage, playerData, gamesTarget }) {
 
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.font = 'bold 48px Roboto, Arial, sans-serif';
+        ctx.font = 'bold 55px Roboto, Arial, sans-serif';
 
         const topX = img.width * 0.597;
         const pointsX = img.width * 0.74;
