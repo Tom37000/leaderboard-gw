@@ -417,9 +417,8 @@ function LeaderboardGamewardAllWls() {
     const sortedPlayers = playersData
         .map((playerData, index) => ({ ...playerData, config: playerConfigs[index], index }))
         .filter(player => player.config.display_player_name && player.config.display_player_name.trim() !== '')
+        .filter(player => player.rank !== '-')
         .sort((a, b) => {
-            if (a.rank === '-') return 1;
-            if (b.rank === '-') return -1;
             return a.rank - b.rank;
         });
 
