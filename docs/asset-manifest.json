@@ -1,13 +1,15 @@
 {
   "files": {
-    "main.css": "/leaderboard-gw/static/css/main.95533829.css",
-    "main.js": "/leaderboard-gw/static/js/main.304b3b6b.js",
+    "main.css": "/leaderboard-gw/static/css/main.76b87f59.css",
+    "main.js": "/leaderboard-gw/static/js/main.9cf020f7.js",
     "static/js/453.d9b1943c.chunk.js": "/leaderboard-gw/static/js/453.d9b1943c.chunk.js",
+    "static/media/indicateur_pov_corps_kombek_cup.png": "/leaderboard-gw/static/media/indicateur_pov_corps_kombek_cup.ae90debdd7bf578612e2.png",
     "static/media/indicateur_pov_corps_baxo_cup.png": "/leaderboard-gw/static/media/indicateur_pov_corps_baxo_cup.aa9372e8ddb6e934d2c8.png",
     "static/media/indicateur_pov_corps_icee_cup.png": "/leaderboard-gw/static/media/indicateur_pov_corps_icee_cup.01de5b44cedb6389ff7e.png",
     "static/media/indicateur_pov_corps_nociff_cup.png": "/leaderboard-gw/static/media/indicateur_pov_corps_nociff_cup.2aeded7c6fd217d7f4b5.png",
     "static/media/indicateur_pov_corps_voxe_cup.png": "/leaderboard-gw/static/media/indicateur_pov_corps_voxe_cup.1c1fb59d8fa6cb27cfa2.png",
     "static/media/indicateur_pov_corps_tylio_cup.png": "/leaderboard-gw/static/media/indicateur_pov_corps_tylio_cup.298287aff0d7849ce021.png",
+    "static/media/Kombek.png": "/leaderboard-gw/static/media/Kombek.3e59ee73c387cd63fcd1.png",
     "static/media/Nociff.png": "/leaderboard-gw/static/media/Nociff.4e309321bd3c8bc110c7.png",
     "static/media/icee.png": "/leaderboard-gw/static/media/icee.544b69408e330879d857.png",
     "static/media/voxe.png": "/leaderboard-gw/static/media/voxe.d857f3f9c7e1451a9acc.png",
@@ -15,12 +17,12 @@
     "static/media/baxo.png": "/leaderboard-gw/static/media/baxo.367f240b485c9b61bfe8.png",
     "static/media/IconGwWin.PNG": "/leaderboard-gw/static/media/IconGwWin.ad763c5077d51658f557.PNG",
     "index.html": "/leaderboard-gw/index.html",
-    "main.95533829.css.map": "/leaderboard-gw/static/css/main.95533829.css.map",
-    "main.304b3b6b.js.map": "/leaderboard-gw/static/js/main.304b3b6b.js.map",
+    "main.76b87f59.css.map": "/leaderboard-gw/static/css/main.76b87f59.css.map",
+    "main.9cf020f7.js.map": "/leaderboard-gw/static/js/main.9cf020f7.js.map",
     "453.d9b1943c.chunk.js.map": "/leaderboard-gw/static/js/453.d9b1943c.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.95533829.css",
-    "static/js/main.304b3b6b.js"
+    "static/css/main.76b87f59.css",
+    "static/js/main.9cf020f7.js"
   ]
 }

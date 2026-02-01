@@ -10,6 +10,7 @@ import IconGwWin from './IconGwWin.PNG';
 import IconIcee from './IconIcee.png';
 import IconBaxo from './IconBaxo.png';
 import IconNociff from './Nociff.png';
+import IconKombek from './Kombek.png';
 
 import IconTylio from './IconTylio.png';
 import IconVoxe from './IconVoxe.png';
@@ -243,9 +244,10 @@ function LeaderboardGameward() {
             icon: IconNociff
         },
         {
-            ingame_id: "",
-            display_player_name: "",
-            avatar_image: avatarPersonne
+            ingame_id: "2a208e4f0ad94df495aaf82bf74beda9",
+            display_player_name: "Kombek",
+            avatar_image: IconKombek,
+            icon: IconKombek
         }
     ];
 

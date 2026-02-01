@@ -7,6 +7,7 @@ import voxeImage from './voxe.png';
 import BaxoImage from './baxo.png';
 import avatarPersonne from './avatar-personne.png';
 import IconNociff from './Nociff.png';
+import IconKombek from './Kombek.png';
 
 
 const formatNumber = (num) => {
@@ -80,9 +81,9 @@ function LeaderboardGamewardAllWls() {
             avatar_image: IconNociff
         },
         {
-            ingame_id: "",
-            display_player_name: "",
-            avatar_image: avatarPersonne
+            ingame_id: "2a208e4f0ad94df495aaf82bf74beda9",
+            display_player_name: "Kombek",
+            avatar_image: IconKombek
         }
     ];
 
@@ -447,6 +448,8 @@ function LeaderboardGamewardAllWls() {
                     <div className='summary-players'>
                         {sortedPlayers.map((player, displayIndex) => {
                             const rankClass = `rank-${displayIndex + 1}`;
+                            const isKombek = player.config.display_player_name === "Kombek";
+                            const avatarClass = `summary-avatar-simple${isKombek ? ' avatar-kombek' : ''}`;
                             return (
                                 <div key={player.index} className={`summary-player-simple ${rankClass}`}>
                                     <div className="player-rank-simple">
@@ -455,7 +458,7 @@ function LeaderboardGamewardAllWls() {
                                     <img
                                         src={player.config.avatar_image}
                                         alt="Avatar"
-                                        className='summary-avatar-simple'
+                                        className={avatarClass}
                                     />
                                     <div className='player-name-simple'>
                                         {player.playerName}

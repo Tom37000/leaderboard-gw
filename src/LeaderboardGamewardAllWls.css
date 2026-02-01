@@ -179,6 +179,12 @@
   order: 2;
 }
 
+.summary-avatar-simple.avatar-kombek {
+  object-fit: contain;
+  padding: 4px;
+  background-color: #1b1246;
+}
+
 .summary-player-simple.rank-1 .summary-avatar-simple {
   border-color: #fbb804;
 }
