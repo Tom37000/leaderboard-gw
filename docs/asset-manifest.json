@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/leaderboard-gw/static/css/main.76b87f59.css",
-    "main.js": "/leaderboard-gw/static/js/main.624683d4.js",
+    "main.css": "/leaderboard-gw/static/css/main.6404d646.css",
+    "main.js": "/leaderboard-gw/static/js/main.d536e36f.js",
     "static/js/453.d9b1943c.chunk.js": "/leaderboard-gw/static/js/453.d9b1943c.chunk.js",
     "static/media/indicateur_pov_corps_kombek_cup.png": "/leaderboard-gw/static/media/indicateur_pov_corps_kombek_cup.ae90debdd7bf578612e2.png",
     "static/media/indicateur_pov_corps_baxo_cup.png": "/leaderboard-gw/static/media/indicateur_pov_corps_baxo_cup.aa9372e8ddb6e934d2c8.png",
@@ -17,12 +17,12 @@
     "static/media/baxo.png": "/leaderboard-gw/static/media/baxo.367f240b485c9b61bfe8.png",
     "static/media/IconGwWin.PNG": "/leaderboard-gw/static/media/IconGwWin.ad763c5077d51658f557.PNG",
     "index.html": "/leaderboard-gw/index.html",
-    "main.76b87f59.css.map": "/leaderboard-gw/static/css/main.76b87f59.css.map",
-    "main.624683d4.js.map": "/leaderboard-gw/static/js/main.624683d4.js.map",
+    "main.6404d646.css.map": "/leaderboard-gw/static/css/main.6404d646.css.map",
+    "main.d536e36f.js.map": "/leaderboard-gw/static/js/main.d536e36f.js.map",
     "453.d9b1943c.chunk.js.map": "/leaderboard-gw/static/js/453.d9b1943c.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.76b87f59.css",
-    "static/js/main.624683d4.js"
+    "static/css/main.6404d646.css",
+    "static/js/main.d536e36f.js"
   ]
 }

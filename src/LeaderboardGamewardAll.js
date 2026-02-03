@@ -1,145 +1,127 @@
 import './LeaderboardGamewardAll.css';
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation } from 'react-router-dom';
 import iceeImage from './icee.png';
 import tylioImage from './tylio.png';
 import voxeImage from './voxe.png';
-import baxoImage from './baxo.png';
-import avatarPersonne from './avatar-personne.png';
+import BaxoImage from './baxo.png';
+import IconNociff from './Nociff.png';
+import IconKombek from './Kombek.png';
 
+const formatNumber = (num) => {
+    if (num === null || num === undefined || num === '-') return num;
+    const numValue = typeof num === 'string' ? parseInt(num, 10) : num;
+    if (isNaN(numValue)) return num;
+    if (numValue >= 10000) {
+        return numValue.toString().replace(/(\d)(?=(\d{3})+$)/g, '$1 ');
+    }
+    return numValue.toString();
+};
 
 function LeaderboardGamewardAll() {
     const urlParams = new URLSearchParams(useLocation().search);
-    const eventId = urlParams.get('eventId');
-    const eventId2 = urlParams.get('eventId2');
+    const parseIdAndTarget = (raw) => {
+        if (!raw) return { id: null, target: null };
+        const [idPart, targetPart] = String(raw).split('/');
+        const target = targetPart && /^\d+$/.test(targetPart) ? parseInt(targetPart, 10) : null;
+        return { id: idPart, target };
+    };
+
+    const { id: eventId } = parseIdAndTarget(urlParams.get('eventId'));
+    const { id: eventId2 } = parseIdAndTarget(urlParams.get('eventId2'));
     const API_KEY = process.env.REACT_APP_FORTNITE_API_KEY;
-    
+
     const isCumulativeMode = eventId2 !== null;
-    
- const playerConfigs = [
+
+    const playerConfigs = [
         {
             epic_id: "70a8b05d217d47a381e9137b9a0dce51",
-            display_player_name: "ICEE",
+            display_player_name: "Icee",
             avatar_image: iceeImage
         },
         {
-            epic_id: "31d45164d7cc4c96bef16da56c2b5f8c", 
-            display_player_name: "NOÉ", 
-            avatar_image: avatarPersonne
-        },
-        {
-            epic_id: "3ed9da5cff0948c98196c803412d6321", 
-            display_player_name: "LAYN", 
-            avatar_image: avatarPersonne
-        },
-        {
-            epic_id: "d038d3b7a13d4323b2ebca05644d9124",
-            display_player_name: "TYLIO",
-            avatar_image: tylioImage
-        },
-        {
             epic_id: "48a10d6404c649198c8cf382f12253bc",
-            display_player_name: "VOXE",
+            display_player_name: "Voxe",
             avatar_image: voxeImage
         },
         {
+            epic_id: "d038d3b7a13d4323b2ebca05644d9124",
+            display_player_name: "Tylio",
+            avatar_image: tylioImage
+        },
+        {
             epic_id: "84867c4ef9674c9b838b0c9c815a58fc",
-            display_player_name: "BAXO",
-            avatar_image: baxoImage
+            display_player_name: "Baxo",
+            avatar_image: BaxoImage
+        },
+        {
+            epic_id: "e8e6c5346fe646ba8fa5dc37002eb22d",
+            display_player_name: "Nociff",
+            avatar_image: IconNociff
+        },
+        {
+            epic_id: "2a208e4f0ad94df495aaf82bf74beda9",
+            display_player_name: "Kombek",
+            avatar_image: IconKombek
         }
     ];
 
-    const [playersData, setPlayersData] = useState(
-        playerConfigs.map(config => ({
-            playerName: config.display_player_name,
-            rank: '-',
-            points: '-',
-            games: '-'
-        }))
-    );
+    const [playersData, setPlayersData] = useState(new Array(playerConfigs.length).fill(null));
     const [error, setError] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const previousDataRef = useRef(
-        playerConfigs.map(config => ({
-            playerName: config.display_player_name,
-            rank: '-',
-            points: '-',
-            games: '-'
-        }))
-    );
-    
-    const hasDataChanged = (newData, oldData, index) => {
-        if (!newData && !oldData) return false;
-        if (!newData || !oldData) return true;
-        return newData.rank !== oldData.rank || 
-               newData.points !== oldData.points || 
-               newData.games !== oldData.games;
-    };
-    
-    const updatePlayerDataIfChanged = (newPlayerData, index) => {
-        if (hasDataChanged(newPlayerData, previousDataRef.current[index], index)) {
-            setPlayersData(prevData => {
-                const updatedData = [...prevData];
-                updatedData[index] = newPlayerData;
-                return updatedData;
-            });
-            previousDataRef.current[index] = newPlayerData;
-        }
-    };
 
     useEffect(() => {
         const loadPlayersData = async () => {
             try {
                 const foundPlayers = new Array(playerConfigs.length).fill(null);
-                
+
                 if (isCumulativeMode) {
                     const day1Url = `https://fortniteapi.io/v1/events/window?windowId=${eventId}`;
                     const day2Url = `https://fortniteapi.io/v1/events/window?windowId=${eventId2}`;
-                    
+
                     const fetchEventData = async (url) => {
                         const allResults = [];
                         let page = 0;
                         let totalPages = 1;
-                        
+
                         while (page < totalPages) {
                             const response = await fetch(`${url}&page=${page}`, {
                                 headers: {
                                     'Authorization': API_KEY
                                 }
                             });
-                            
+
                             if (!response.ok) {
                                 throw new Error(`Erreur API: ${response.status}`);
                             }
-                            
+
                             const data = await response.json();
                             const results = data.session?.results || [];
                             allResults.push(...results);
-                            
+
                             if (data.totalPages !== undefined) {
                                 totalPages = data.totalPages;
                             }
-                            
+
                             page++;
                         }
-                        
+
                         return allResults;
                     };
-                    
+
                     const day1Results = await fetchEventData(day1Url);
                     const day2Results = await fetchEventData(day2Url);
                     const teamCumulativeData = new Map();
-                    
+
                     const calculateTeamStats = (sessionHistory) => {
                         if (!sessionHistory || sessionHistory.length === 0) {
                             return { wins: 0, totalPoints: 0, avgPoints: 0, games: 0 };
                         }
-                        
+
                         const wins = sessionHistory.filter(session => session.placement === 1).length;
                         const totalPoints = sessionHistory.reduce((sum, session) => sum + (session.pointsEarned || 0), 0);
                         const games = sessionHistory.length;
                         const avgPoints = games > 0 ? totalPoints / games : 0;
-                        
+
                         return { wins, totalPoints, avgPoints, games };
                     };
 
@@ -161,6 +143,7 @@ function LeaderboardGamewardAll() {
                             day2SessionHistory: []
                         });
                     });
+
                     day2Results.forEach(team => {
                         const teamId = team.teamId;
                         const day2Stats = calculateTeamStats(team.sessionHistory);
@@ -174,7 +157,6 @@ function LeaderboardGamewardAll() {
                             existing.cumulativeWins = existing.day1Wins + day2Stats.wins;
                             existing.pointsEarned = existing.cumulativePoints;
                             existing.day2SessionHistory = team.sessionHistory || [];
-                            existing.sessionHistory = [...existing.day1SessionHistory, ...existing.day2SessionHistory];
                         } else {
                             teamCumulativeData.set(teamId, {
                                 ...team,
@@ -192,13 +174,13 @@ function LeaderboardGamewardAll() {
                             });
                         }
                     });
-                    
-                    teamCumulativeData.forEach((team, teamId) => {
+
+                    teamCumulativeData.forEach((team) => {
                         const allSessions = [...team.day1SessionHistory, ...team.day2SessionHistory];
                         const totalSessionPoints = allSessions.reduce((sum, session) => sum + (session.pointsEarned || 0), 0);
                         team.cumulativeAvgPoints = team.cumulativeGames > 0 ? totalSessionPoints / team.cumulativeGames : 0;
                     });
-                    
+
                     const cumulativeResults = Array.from(teamCumulativeData.values())
                         .sort((a, b) => {
                             if (b.cumulativePoints !== a.cumulativePoints) {
@@ -214,115 +196,109 @@ function LeaderboardGamewardAll() {
                             rank: index + 1,
                             pointsEarned: team.cumulativePoints
                         }));
-                    
+
                     for (let i = 0; i < playerConfigs.length; i++) {
                         const config = playerConfigs[i];
-                        const teamData = cumulativeResults.find(team => 
+                        const teamData = cumulativeResults.find(team =>
                             team.teamAccountIds && team.teamAccountIds.includes(config.epic_id)
                         );
-                        
+
                         if (teamData) {
-                            const newPlayerData = {
+                            foundPlayers[i] = {
                                 playerName: config.display_player_name,
                                 rank: teamData.rank,
                                 points: teamData.pointsEarned,
                                 games: teamData.cumulativeGames || 0
                             };
-                            foundPlayers[i] = newPlayerData;
-                            updatePlayerDataIfChanged(newPlayerData, i);
                         }
                     }
                 } else {
-                    const searchAllPages = async () => {
-                        let page = 0;
-                        let totalPages = 1;
-                        let playersFound = 0;
-                        
-                        while (page < totalPages && playersFound < playerConfigs.length) {
+                    let page = 0;
+                    let totalPages = 1;
+                    let playersFound = 0;
+
+                    while (page < totalPages && playersFound < playerConfigs.length) {
+                        try {
                             const response = await fetch(`https://fortniteapi.io/v1/events/window?windowId=${eventId}&page=${page}`, {
                                 headers: {
                                     'Authorization': API_KEY
                                 }
                             });
-                            
+
                             if (response.ok) {
                                 const data = await response.json();
-                                
+
                                 if (data.result && data.session && data.session.results && data.session.results.length > 0) {
                                     if (data.totalPages !== undefined) {
                                         totalPages = data.totalPages;
                                     }
-                                    
+
                                     for (let i = 0; i < playerConfigs.length; i++) {
                                         if (foundPlayers[i] === null) {
                                             const config = playerConfigs[i];
-                                            const teamData = data.session.results.find(team => 
+                                            const teamData = data.session.results.find(team =>
                                                 team.teamAccountIds && team.teamAccountIds.includes(config.epic_id)
                                             );
-                                            
+
                                             if (teamData) {
-                                                const newPlayerData = {
+                                                foundPlayers[i] = {
                                                     playerName: config.display_player_name,
                                                     rank: teamData.rank,
                                                     points: teamData.pointsEarned,
                                                     games: teamData.sessionHistory ? teamData.sessionHistory.length : 0
                                                 };
-                                                foundPlayers[i] = newPlayerData;
                                                 playersFound++;
-                                                updatePlayerDataIfChanged(newPlayerData, i);
-                                                
-                                                if (playersFound >= playerConfigs.length) {
-                                                    return;
-                                                }
+
+                                                if (playersFound >= playerConfigs.length) break;
                                             }
                                         }
                                     }
                                 }
                             }
-                            page++;
-                        }
-                    };
-                    
-                    await searchAllPages();
+                        } catch (pageError) {}
+
+                        page++;
+                    }
                 }
-                
-                console.log('Données conservées pour les joueurs non trouvés');
-                
+
+                const finalPlayers = foundPlayers.map((player, index) =>
+                    player || {
+                        playerName: playerConfigs[index].display_player_name,
+                        rank: '-',
+                        points: '-',
+                        games: '-'
+                    }
+                );
+
+                setPlayersData(finalPlayers);
                 setError(null);
             } catch (error) {
-                console.error('Error loading players data:', error);
                 setError('Erreur lors du chargement des données: ' + error.message);
             }
         };
-        
+
         if (eventId) {
-            if (isCumulativeMode && !eventId2) {
-                setError('Pour le mode cumulatif, les deux eventIds sont requis (eventId et eventId2)');
-                return;
-            }
             loadPlayersData();
-            const interval = setInterval(loadPlayersData, 30000); 
+            const interval = setInterval(loadPlayersData, 30000);
             return () => clearInterval(interval);
         } else {
-            setError('ID de l\'événement manquant');
+            setError('Overlay');
         }
     }, [eventId, eventId2, isCumulativeMode]);
 
     if (error) {
         return (
-            <div className='summary_overlay'>
-                <div className='summary_error'>{error}</div>
+            <div className='summary-overlay'>
+                <div className='summary-error'>{error}</div>
             </div>
         );
     }
 
-
     const sortedPlayers = playersData
         .map((playerData, index) => ({ ...playerData, config: playerConfigs[index], index }))
+        .filter(player => player.config.display_player_name && player.config.display_player_name.trim() !== '')
+        .filter(player => player.rank !== '-')
         .sort((a, b) => {
-            if (a.rank === '-' && b.rank === '-') return 0;
-            if (a.rank === '-') return 1;
-            if (b.rank === '-') return -1;
             return a.rank - b.rank;
         });
 
@@ -331,14 +307,14 @@ function LeaderboardGamewardAll() {
             <div className='summary-title'>
                 CLASSEMENT
             </div>
-            
+
             {error && (
                 <div className='summary-error'>
                     {error}
                 </div>
             )}
-            
-            {!error && sortedPlayers.length > 0 && (
+
+            {!error && (
                 <div className='summary-content'>
                     <div className='summary-header'>
                         <div className='header-rank'>Top</div>
@@ -349,32 +325,28 @@ function LeaderboardGamewardAll() {
                     <div className='summary-players'>
                         {sortedPlayers.map((player, displayIndex) => {
                             const rankClass = `rank-${displayIndex + 1}`;
+                            const isKombek = player.config.display_player_name === "Kombek";
+                            const avatarClass = `summary-avatar-simple${isKombek ? ' avatar-kombek' : ''}`;
                             return (
                                 <div key={player.index} className={`summary-player-simple ${rankClass}`}>
                                     <div className="player-rank-simple">
-                                        {player.rank}
+                                        {formatNumber(player.rank)}
                                     </div>
-                                    <img 
-                                        src={player.config.avatar_image} 
-                                        alt="Avatar" 
-                                        className='summary-avatar-simple' 
+                                    <img
+                                        src={player.config.avatar_image}
+                                        alt="Avatar"
+                                        className={avatarClass}
                                     />
                                     <div className='player-name-simple'>
                                         {player.playerName}
                                     </div>
                                     <div className='player-points-simple'>
-                                        {player.points}
+                                        {formatNumber(player.points)}
                                     </div>
                                 </div>
                             );
                         })}
                     </div>
-                </div>
-            )}
-            
-            {!error && sortedPlayers.length === 0 && (
-                <div className='summary-error'>
-                    Aucune donnée disponible
                 </div>
             )}
         </div>

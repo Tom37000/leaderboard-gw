@@ -139,7 +139,8 @@ function PlayerCanvas({ baseImage, playerData, gamesTarget }) {
             const currentWidth = ctx.measureText(currentText).width;
             const slashWidth = ctx.measureText(slashText).width;
             const targetWidth = ctx.measureText(targetText).width;
-            const totalWidth = currentWidth + slashWidth + targetWidth;
+            const spacing = 6;
+            const totalWidth = currentWidth + spacing + slashWidth + spacing + targetWidth;
 
             const startX = gameX - totalWidth / 2;
 
@@ -148,8 +149,8 @@ function PlayerCanvas({ baseImage, playerData, gamesTarget }) {
             ctx.fillText(currentText, startX, statsY);
 
             ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-            ctx.fillText(slashText, startX + currentWidth, statsY);
-            ctx.fillText(targetText, startX + currentWidth + slashWidth, statsY);
+            ctx.fillText(slashText, startX + currentWidth + spacing, statsY);
+            ctx.fillText(targetText, startX + currentWidth + spacing + slashWidth + spacing, statsY);
 
             ctx.textAlign = 'center';
         } else {
